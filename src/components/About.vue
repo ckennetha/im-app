@@ -11,13 +11,15 @@ const aboutString = computed(() => marked.parse(mdAbout))
 
 <template>
   <div class="flex flex-col min-h-screen">
-    <header>
+    <header class="fixed top-0 left-0 right-0 z-50 flex items-center
+      justify-between ps-2 pe-3 py-2 mx-auto max-w-[1280px] bg-background"
+    >
       <Navbar />
     </header>
-    <div class="flex-grow space-y-8 mx-auto mt-29 max-w-[768px] text-left">
+    <main class="flex-grow space-y-8 mx-auto mt-29 max-w-[768px] text-left">
       <h1>About InterMol</h1>
       <div v-html="aboutString" class="space-y-3 text-lg"></div>
-    </div>
+    </main>
   </div>
 </template>
 
