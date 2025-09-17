@@ -28,14 +28,16 @@ const tokenTypes: CoreTokenType[] = [
 // state
 const open = ref<boolean>(false)
 const rangeCoverage = ref<Range>([0, 100])
-const seleTokenTypes = ref<CoreTokenType[]>([...tokenTypes])
+const seleTokenTypes = ref<CoreTokenType[]>([])
 
 // utils
 function applyCoverage() {
   table.getColumn("dataCoverage")?.setFilterValue(rangeCoverage)
 }
 
-function applyTokenTypes() {
+function onUpdateTokenTypes(v: unknown) {
+  const arr = Array.isArray(v) ? (v as CoreTokenType[]) : []
+  seleTokenTypes.value = arr
   table.getColumn("dataTokenTypes")?.setFilterValue(seleTokenTypes.value)
 }
 </script>
@@ -88,12 +90,7 @@ function applyTokenTypes() {
         <Select
           id="tkType" multiple
           :model-value="seleTokenTypes"
-          @update:model-value="(v: unknown) => {
-            const arr = Array.isArray(v) ? (v as CoreTokenType[]) : []
-            if (arr.length === 0) return
-            seleTokenTypes = arr
-            applyTokenTypes()
-          }"
+          @update:model-value="onUpdateTokenTypes"
         >
           <SelectTrigger class="w-full">
             <SelectValue />

@@ -11,6 +11,7 @@ import type { Token, CoreTokenType } from "@/utils/tokenize"
 import { activationToColor } from "@/utils/visualizer"
 
 import type { ColumnDef, FilterFn } from "@tanstack/vue-table"
+import type { RDKitModule } from "@rdkit/rdkit"
 import { h } from "vue"
 
 // default
@@ -26,6 +27,12 @@ export interface FlatFeatureActivations extends TokenActivations {
   featureIdx: FeatureIdx;
 }
 
+interface DataAttributes {
+  activations: number[];
+  colorHexTokens: string[];
+  svgOptionsString?: string;
+}
+
 // filter logic
 export const filterCoverageInBetween: FilterFn<any> = (
   row, columnId, range: Range
@@ -39,8 +46,10 @@ export const filterCoverageInBetween: FilterFn<any> = (
 export const filterTokenTypes: FilterFn<any> = (
   row, columnId, tokenTypes: CoreTokenType[]
 ) => {
+  if (tokenTypes.length === 0) return true
   const rawValue = row.getValue<Set<CoreTokenType>>(columnId)
-  return tokenTypes.some(item => rawValue.has(item))
+  if (rawValue.size !== tokenTypes.length) return false
+  return tokenTypes.every(item => rawValue.has(item))
 }
 
 // sort utils
@@ -49,13 +58,13 @@ const mean = (data: number[], divisor: number) =>
   data.reduce((acc, val) => acc + val, 0) / divisor
 
 // columns
-export function createActColumns(tokens: Token[], isInSearch?: boolean) {
+export function createActColumns(
+  tokens: Token[], isInSearch?: boolean, RDKit?: RDKitModule
+) {
   const actsColumns: ColumnDef<FlatFeatureActivations>[] = [
     {
       accessorKey: "featureIdx",
-      header: () => h(
-        "div", { class: alignLeft }, "Feature"
-      ),
+      header: () => h("div", { class: alignLeft }, "Feature"),
       cell: ({row}) => {
         const smi: MoleculeSmiles = tokens.map(tk => tk.token).join('')
         const feature = Number(row.getValue("featureIdx"))
@@ -80,16 +89,8 @@ export function createActColumns(tokens: Token[], isInSearch?: boolean) {
           ]]
         }
       ),
-      filterFn: filterCoverageInBetween,
       cell: ({row}) => {
-        const { data, indices } = row.original as FlatFeatureActivations
-
-        const activations = new Array(tokens.length).fill(0.0)
-        indices.forEach((tkIdx, idx) => { activations[tkIdx] = data[idx] })
-        
-        const { colorHexTokens } = activationToColor(
-          tokens, activations, false
-        )
+        const { activations, colorHexTokens } = row.getValue<DataAttributes>('dataAttrs')
 
         const innerElement = isInSearch
           ? h(TooltipProvider, { disabled: false }, {
@@ -109,7 +110,20 @@ export function createActColumns(tokens: Token[], isInSearch?: boolean) {
         return element
       }
     },
-    // hidden
+    // hidden columns
+    {
+      id: "dataAttrs",
+      accessorFn: (row): DataAttributes => {
+        const activations = new Array(tokens.length).fill(0.0)
+        row.indices.forEach((tkIdx, idx) => { activations[tkIdx] = row.data[idx] })
+        
+        const { colorHexTokens, svgOptionsString } = activationToColor(
+          tokens, activations, !!isInSearch
+        )
+        return ({ activations, colorHexTokens, svgOptionsString })
+      },
+      enableHiding: true
+    },
     {
       id: "dataMax",
       accessorFn: (row) => max(row.data),
@@ -144,6 +158,31 @@ export function createActColumns(tokens: Token[], isInSearch?: boolean) {
       enableHiding: true
     }
   ]
+
+  if (isInSearch && RDKit) {
+    const viz2DColumn: ColumnDef<FlatFeatureActivations> = {
+      id: "viz2D",
+      header: () => h("div", { class: "text-center" }, "Structure"),
+      cell: ({row}) => {
+        const smiles = tokens.map((tk) => tk.token).join("")
+        const mol = RDKit.get_mol(smiles)
+
+        const featureIdx = row.getValue("featureIdx")
+        const { svgOptionsString } = row.getValue<DataAttributes>('dataAttrs')
+        if (svgOptionsString) {
+          const svgString = mol?.get_svg_with_highlights(svgOptionsString)
+          const innerElement = h("img", {
+            src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString!)}`,
+            alt: `f/${featureIdx}`,
+            class: "block shrink-0 max-w-none h-32 object-contain"
+          })
+          return h('div', { class: 'flex items-center justify-center w-full' }, innerElement)
+        } else { return h("div", { class: "text-center" }, "Structure unavailable.") }
+      }
+    }
+    actsColumns.push(viz2DColumn)
+  }
+  
   return actsColumns
 }
 

@@ -1,4 +1,4 @@
-import { Home, Explore, Search, About } from "@/components"
+import { Home, About } from "@/components"
 import { DEFAULT_FEATURE, DEFAULT_MODEL } from "@/cfg"
 import { useFromRouteStore } from "@/store"
 
@@ -22,7 +22,7 @@ const routes = [
   {
     path: '/explore/:model/:feature',
     name: 'Explore',
-    component: Explore,
+    component: () => import("@/components/Explore.vue"),
     beforeEnter: normalizeRouteExplore
   },
   {
@@ -34,7 +34,7 @@ const routes = [
   {
     path: '/search/:model',
     name: 'Search',
-    component: Search,
+    component: () => import("@/components/Search.vue"),
     beforeEnter: normalizeRouteSearch,
   },
   {

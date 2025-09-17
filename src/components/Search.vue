@@ -149,12 +149,16 @@ watch(() => statusPipeline.value, async () => {
         </Alert>
       </div>
       <div v-if="activations" class="w-full">
-        <SearchMolecule
-          :id="idMolecule"
-          :tokens
-          :activations
-          isInSearch
-        />
+        <Suspense>
+          <template #default>
+            <SearchMolecule
+              :id="idMolecule"
+              :tokens
+              :activations
+              isInSearch
+            />
+          </template>
+        </Suspense>
       </div>
     </div>
   </ExploreSidebar>

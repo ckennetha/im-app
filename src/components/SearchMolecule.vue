@@ -4,6 +4,7 @@ import { createActColumns, toFlatFeatureActivations } from "./exp/activation/col
 import type { FlatFeatureActivations } from './exp/activation/columns'
 
 import type { TokenActivations } from '@/utils/inference'
+import initRDKit from '@/utils/initRDKit'
 import type { Token } from '@/utils/tokenize'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { shallowRef, onMounted } from 'vue'
@@ -19,14 +20,16 @@ const props = defineProps<{
 const columns = shallowRef<ColumnDef<FlatFeatureActivations>[]>([])
 const actedFeatures = shallowRef<FlatFeatureActivations[]>([])
 
+const RDKit = await initRDKit()
+
 onMounted(() => {
-  columns.value = createActColumns(props.tokens, true)
+  columns.value = createActColumns(props.tokens, true, RDKit)
   actedFeatures.value = toFlatFeatureActivations(props.activations)
 })
 </script>
 
 <template>
-  <ActsTable :columns :data="actedFeatures" :isInSearch/>
+  <ActsTable :columns :data="actedFeatures" :isInSearch="props.isInSearch"/>
 </template>
 
 <style scoped>

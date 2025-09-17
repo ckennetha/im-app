@@ -43,6 +43,7 @@ const table = useVueTable({
   getSortedRowModel: getSortedRowModel(),
   initialState: {
     columnVisibility: {
+      dataAttrs: false,
       dataMax: false,
       dataMeanNonzero: false,
       dataMeanAll: false,
