@@ -2,6 +2,7 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select"
@@ -45,13 +46,18 @@ watch(() => sortMode.value, () => {
       </Button>
     </SelectTrigger>
     <SelectContent>
-      <SelectItem
-        v-for="sorter in sortModes"
-        :key="sorter"
-        :value="sorter"
-      >
-        {{ sorter }}
-      </SelectItem>
+      <SelectGroup>
+        <h2 class="ps-2 py-2 text-base leading-none font-medium">
+          Sort by:
+        </h2>
+        <SelectItem
+          v-for="sorter in sortModes"
+          :key="sorter"
+          :value="sorter"
+        >
+          {{ sorter }}
+        </SelectItem>
+      </SelectGroup>
     </SelectContent>
   </Select>
 </template>

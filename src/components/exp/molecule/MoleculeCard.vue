@@ -7,12 +7,13 @@ import ActsTable from "../activation/ActsTable.vue"
 
 import type { ModelKey } from "@/config"
 import initRDKit from "@/utils/initRDKit"
+import { activationToColor } from "@/utils/visualizer"
 
 import type { FlatFeatureActivations } from "../activation/columns"
 import { createActColumns, toFlatFeatureActivations } from "../activation/columns"
 import { useMoleculePipeline, type PipelineStage } from "@/composables/useMoleculePipeline"
-import useVisualizer from "@/composables/useVisualizer"
 
+import type { RDKitModule } from "@rdkit/rdkit"
 import type { ColumnDef } from "@tanstack/vue-table"
 import { shallowRef, watch, onMounted } from "vue"
 import { SquareArrowOutUpRight } from "lucide-vue-next"
@@ -29,6 +30,12 @@ const emit = defineEmits<{
   (e: PipelineStage): void;
 }>()
 
+// types
+interface VisualizerObject {
+  colorHexTokens: string[];
+  svg2DString: string;
+}
+
 // state
 const columns = shallowRef<ColumnDef<FlatFeatureActivations>[]>()
 const actedFeatures = shallowRef<FlatFeatureActivations[] | null>(null)
@@ -43,7 +50,8 @@ const {
   processor,
 } = useMoleculePipeline(true)
 
-const { activationsPerFeature, visObject, makeVisual } = useVisualizer(true)
+const activationsPerFeature = shallowRef<number[]>([])
+const visObject = shallowRef<VisualizerObject>({ colorHexTokens: [], svg2DString: "" })
 
 // utils
 function getActivationsPerFeature() {
@@ -55,7 +63,20 @@ function getActivationsPerFeature() {
       tmpActivations[tkIdx] = data[idx]
     })
   }
+
   activationsPerFeature.value = tmpActivations
+}
+
+function getVisualization(RDKit: RDKitModule) {
+  const { colorHexTokens, svgOptionsString } = activationToColor(
+    tokens.value, activationsPerFeature.value, true
+  )
+
+  const mol = RDKit!.get_mol(canonSmiles.value!)
+  const svg2DString = mol!.get_svg_with_highlights(svgOptionsString!)
+  mol!.delete()
+
+  visObject.value = { colorHexTokens, svg2DString }
 }
 
 onMounted(async () => {
@@ -75,7 +96,7 @@ onMounted(async () => {
 
     getActivationsPerFeature()
     statusPipeline.value = "visualizing"
-    makeVisual(canonSmiles.value!, tokens.value, RDKit)
+    getVisualization(RDKit)
 
     columns.value = createActColumns(tokens.value, false)
     actedFeatures.value = toFlatFeatureActivations(
@@ -114,7 +135,7 @@ watch([() => props.model, () => props.feature], async (
 
     getActivationsPerFeature()
     statusPipeline.value = "visualizing"
-    makeVisual(canonSmiles.value!, tokens.value!, RDKit)
+    getVisualization(RDKit)
   } catch (err) {
     console.error('Error:', err)
   } finally {
@@ -123,9 +144,7 @@ watch([() => props.model, () => props.feature], async (
   }
 })
 
-watch(statusPipeline, (newStage) => {
-  emit(newStage)
-})
+watch(statusPipeline, (newStage) => emit(newStage))
 </script>
 
 <template>
@@ -154,7 +173,7 @@ watch(statusPipeline, (newStage) => {
           :disabled="isSmilesInvalid"
         >
           <template v-if="!isSmilesInvalid">
-            <img v-if="!isSmilesInvalid"
+            <img
               :src="`data:image/svg+xml;charset=utf-8,${encodeURIComponent(visObject?.svg2DString!)}`"
               :alt="`${id}`"
               class="w-full h-full object-contain"
@@ -183,7 +202,7 @@ watch(statusPipeline, (newStage) => {
                 <TokenVisualizer 
                   :tokens="tokens"
                   :activations="activationsPerFeature"
-                  :color-hex-tokens="visObject.colorHexTokens"
+                  :colorHexTokens="visObject.colorHexTokens"
                 />
               </TooltipProvider>
             </div>

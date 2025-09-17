@@ -56,9 +56,9 @@ watch(
 
 <template>
   <div class="space-y-3 w-full text-left">
-    <TooltipProvider disableClosingTrigger>
-      <div class="flex flex-1 flex-wrap items-center gap-2">
-        <h1 class="text-3xl font-medium">Activation Distribution</h1>
+    <div class="flex flex-1 flex-wrap items-center gap-2">
+      <h1 class="text-3xl font-medium">Activation Distribution</h1>
+      <TooltipProvider disableClosingTrigger>
         <Tooltip v-model:open="open">
           <TooltipTrigger as-child>
             <Button size="icon" class="size-5 !px-0 !pt-1 !pb-0
@@ -76,12 +76,14 @@ watch(
             maximum SAE activation.
           </TooltipContent>
         </Tooltip>
-      </div>
-      <div v-if="ssv" class="space-y-3">
-        <Collapsible v-for="(sample, label, idx) in ssv" :key="label"
-          :defaultOpen="idx === 0"
-          class="border-b-2"
-        >
+      </TooltipProvider>
+    </div>
+    <div v-if="ssv" class="space-y-3">
+      <Collapsible v-for="(sample, label, idx) in ssv" :key="label"
+        :defaultOpen="idx === 0"
+        class="border-b-2"
+      >
+        <TooltipProvider>
           <CollapsibleTrigger class="relative flex flex-1 items-center justify-between
             mb-3 !p-0 w-full !border-none !rounded-none hover:underline
             [&[data-state=open]>svg]:rotate-180"
@@ -91,7 +93,7 @@ watch(
             </h2>
             <ChevronDown class="size-4 text-muted-foreground transition-transform duration-200"/>
           </CollapsibleTrigger>
-          <CollapsibleContent class="w-full overflow-x-auto">
+          <CollapsibleContent class="w-full">
             <Suspense>
               <template #default>
                 <ActivatorVisualizer :sample />
@@ -103,11 +105,11 @@ watch(
               </template>
             </Suspense>
           </CollapsibleContent>
-        </Collapsible>
-      </div>
-      <div v-else class="flex items-center justify-center h-48 overflow-y-hidden">
-        <img src="/im-spinner.svg" class="animate-spin h-24"/>
-      </div>
-    </TooltipProvider>
+        </TooltipProvider>
+      </Collapsible>
+    </div>
+    <div v-else class="flex items-center justify-center h-48 overflow-y-hidden">
+      <img src="/im-spinner.svg" class="animate-spin h-24"/>
+    </div>
   </div>
 </template>

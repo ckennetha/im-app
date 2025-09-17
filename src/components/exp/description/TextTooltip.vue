@@ -25,7 +25,7 @@ const open = ref<boolean>(false)
       </TooltipTrigger>
       <TooltipContent
         v-html="text"
-        class="bg-foreground text-background text-center pb-2"
+        class="bg-foreground text-background text-center"
       />
     </Tooltip>
   </TooltipProvider>
