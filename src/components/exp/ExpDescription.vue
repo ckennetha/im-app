@@ -71,7 +71,7 @@ watch(() => url.value, async () => {
           >
             We calculated SAE activations across ~1,300,000 unique canonical SMILES.
             These metrics describe how this feature behaves for a specific concept
-            when activations are above the 0.00 and 0.20 thresholds.
+            when activations are above the 0, 0.20, and 0.50 thresholds.
             <br><br>
             We subsequently select concepts that contain at least 100 tokens in the
             samples with an F1 score ≥ 0.50, or at least 1000 tokens with Precision

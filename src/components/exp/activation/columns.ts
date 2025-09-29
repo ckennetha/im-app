@@ -174,7 +174,7 @@ export function createActColumns(
           const innerElement = h("img", {
             src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString!)}`,
             alt: `f/${featureIdx}`,
-            class: "block shrink-0 max-w-none h-32 object-contain"
+            class: "block shrink-0 max-w-none h-56 object-contain"
           })
           return h('div', { class: 'flex items-center justify-center w-full' }, innerElement)
         } else { return h("div", { class: "text-center" }, "Structure unavailable.") }
