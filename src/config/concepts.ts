@@ -275,7 +275,7 @@ export const Concepts: Record<ModelKey, Record<CoreTokenType, Record<string, num
       "[NH+]": [2147],
       "[CH]": [2764]
     },
-    "branch": {
+    "ring": {
       "4": [
         6, 36, 49, 66, 77, 89, 93, 114, 185, 254, 258, 259, 267, 287, 299, 332,
         339, 347, 363, 448, 465, 482, 504, 506, 511, 527, 544, 605, 634, 732,
@@ -413,7 +413,7 @@ export const Concepts: Record<ModelKey, Record<CoreTokenType, Record<string, num
         2862, 2887, 2895, 2920, 2941, 2948, 2967, 3047
       ]
     },
-    "ring": {
+    "branch": {
       ")": [
         9, 25, 58, 67, 75, 130, 134, 152, 165, 173, 227, 242, 255, 298, 338,
         379, 410, 427, 441, 454, 456, 461, 480, 500, 503, 510, 669, 674, 695,
@@ -754,7 +754,7 @@ export const Concepts: Record<ModelKey, Record<CoreTokenType, Record<string, num
       "B": [654, 715],
       "[c-]": [1643]
     },
-    "branch": {
+    "ring": {
       "9": [5],
       "2": [
         9, 11, 67, 98, 117, 132, 152, 163, 172, 174, 178, 211, 235, 257, 290,
@@ -838,7 +838,7 @@ export const Concepts: Record<ModelKey, Record<CoreTokenType, Record<string, num
         2931, 2962, 2993
       ]
     },
-    "ring": {
+    "branch": {
       "(": [
         12, 15, 53, 55, 67, 72, 83, 125, 135, 138, 189, 211, 217, 238, 261, 275,
         278, 283, 314, 317, 324, 330, 348, 372, 376, 421, 458, 472, 485, 545,
@@ -883,7 +883,7 @@ export const Concepts: Record<ModelKey, Record<CoreTokenType, Record<string, num
     }
   },
   "MOL-6-3072-128": {
-    "ring": {
+    "branch": {
       "(": [
         2, 26, 36, 46, 70, 140, 153, 178, 229, 262, 273, 304, 306, 327, 342,
         429, 431, 433, 434, 454, 460, 484, 492, 513, 548, 549, 656, 659, 679,
@@ -918,7 +918,7 @@ export const Concepts: Record<ModelKey, Record<CoreTokenType, Record<string, num
         3016, 3018, 3032, 3044, 3053
       ]
     },
-    "branch": {
+    "ring": {
       "1": [
         3, 4, 8, 36, 56, 60, 81, 83, 88, 90, 107, 131, 144, 178, 193, 224, 242,
         257, 263, 310, 348, 380, 473, 486, 524, 555, 587, 607, 624, 634, 657,
@@ -1382,7 +1382,7 @@ export const Concepts: Record<ModelKey, Record<CoreTokenType, Record<string, num
         2157, 2279, 2583, 2674, 2846, 2986
       ]
     },
-    "ring": {
+    "branch": {
       "(": [
         6, 30, 38, 44, 55, 72, 106, 125, 131, 152, 153, 205, 211, 231, 254, 271,
         309, 327, 346, 365, 386, 415, 429, 439, 447, 471, 477, 479, 485, 536,
@@ -1454,7 +1454,7 @@ export const Concepts: Record<ModelKey, Record<CoreTokenType, Record<string, num
         2296, 2360, 2583, 2611, 2674, 2766, 2858
       ]
     },
-    "branch": {
+    "ring": {
       "1": [
         50, 100, 133, 232, 235, 255, 284, 351, 354, 413, 447, 545, 637, 783,
         989, 1050, 1099, 1118, 1171, 1219, 1319, 1374, 1412, 1431, 1498, 1514,
@@ -1474,7 +1474,7 @@ export const Concepts: Record<ModelKey, Record<CoreTokenType, Record<string, num
     }
   },
   "MOL-12-3072-128": {
-    "ring": {
+    "branch": {
       ")": [
         2, 22, 33, 37, 44, 53, 89, 93, 95, 105, 139, 141, 158, 160, 164, 183,
         189, 191, 224, 230, 241, 254, 267, 273, 277, 280, 281, 283, 284, 328,
@@ -1511,7 +1511,7 @@ export const Concepts: Record<ModelKey, Record<CoreTokenType, Record<string, num
         2931, 2938, 2957, 2977, 2998, 3017, 3029, 3054, 3066
       ]
     },
-    "branch": {
+    "ring": {
       "1": [
         10, 44, 105, 158, 255, 337, 357, 390, 442, 524, 610, 876, 878, 930, 945,
         960, 972, 1038, 1047, 1058, 1306, 1313, 1437, 1543, 1564, 1688, 1745,
