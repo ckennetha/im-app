@@ -1,6 +1,6 @@
-import type { MoleculeStore } from "@/store"
 import { reactive, isRef, type Ref } from "vue"
 import { toast } from "vue-sonner"
+import type { MoleculeSmiles, MoleculeStore } from "@/store"
 
 // types
 interface KetcherStatus {
@@ -10,15 +10,12 @@ interface KetcherStatus {
 
 interface KetcherOutput {
   log: string;
-  smi?: string;
+  smi?: MoleculeSmiles;
 }
 
 export default function useKetcher() {
   // status
-  const statusKetcher = reactive<KetcherStatus>({
-    isKetcherBusy: false,
-    isLimitReached: false,
-  })
+  const statusKetcher = reactive<KetcherStatus>({ isKetcherBusy: false, isLimitReached: false })
 
   // handler
   async function drawToSmiles (): Promise<KetcherOutput> {

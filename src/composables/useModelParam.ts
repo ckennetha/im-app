@@ -1,7 +1,7 @@
-import type { ModelKey } from "@/config"
-
 import { computed } from "vue"
 import { useRoute, useRouter } from "vue-router"
+
+import type { ModelKey } from "@/config"
 
 export default function useModelPath() {
   const route = useRoute()

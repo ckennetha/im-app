@@ -1,24 +1,17 @@
-import type { ModelKey } from "@/config"
-import type { MoleculeSmiles } from "@/store"
-
-import type { Token } from "@/utils/tokenize"
-import { moleculeToTokens, getBondInfo, type BondRDKit } from "@/utils/pipeline"
-import {
-  activationsCache,
-  inference,
-  type FeatureIdx,
-  type TokenActivations} from "@/utils/inference"
-
-import type { RDKitModule } from "@rdkit/rdkit"
+import { ref, shallowRef, type Ref, type ShallowRef } from "vue"
 import { xxhash64 } from "hash-wasm"
 import { get } from "idb-keyval"
-import { ref, shallowRef, type Ref, type ShallowRef } from "vue"
+import type { RDKitModule } from "@rdkit/rdkit"
+
+import type { ModelKey } from "@/config"
+import type { MoleculeSmiles } from "@/store"
+import type { Token } from "@/utils/tokenize"
+
+import { moleculeToTokens, getBondInfo, type BondRDKit } from "@/utils/pipeline"
+import { activationsCache, inference, type FeatureIdx, type TokenActivations } from "@/utils/inference"
 
 // types
-export type PipelineStage = "idle"
-  | "tokenizing"
-  | "running-inference"
-  | "visualizing"
+export type PipelineStage = "idle" | "tokenizing" | "running-inference" | "visualizing"
 
 interface canonicalizeOutput {
   validSmiles: MoleculeSmiles;
@@ -51,7 +44,7 @@ export function useMoleculePipeline(
   const isSmilesInvalid = ref<boolean>(false)
   const statusPipeline = ref<PipelineStage>("idle")
 
-  // reactive states
+  // states
   const canonSmiles = ref<MoleculeSmiles | null>(null)
   const tokens = shallowRef<Token[]>([])
   const activations = shallowRef<

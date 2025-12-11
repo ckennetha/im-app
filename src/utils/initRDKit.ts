@@ -1,7 +1,7 @@
-import { type RDKitModule } from "@rdkit/rdkit";
+import { type RDKitModule } from "@rdkit/rdkit"
 
 const initRDKit = (() => {
-  let rdkitLoadingPromise: Promise<RDKitModule>;
+  let rdkitLoadingPromise: Promise<RDKitModule>
 
   return () => {
     if (!rdkitLoadingPromise) {
@@ -9,17 +9,15 @@ const initRDKit = (() => {
         window
           .initRDKitModule()
           .then((RDKit) => {
-            window.RDKit = RDKit;
-            resolve(RDKit);
+            window.RDKit = RDKit
+            resolve(RDKit)
           })
-          .catch(() => {
-            reject();
-          });
-      });
+          .catch(() => { reject() })
+      })
     }
 
-    return rdkitLoadingPromise;
-  };
-})();
+    return rdkitLoadingPromise
+  }
+})()
 
-export default initRDKit;
+export default initRDKit

@@ -1,8 +1,8 @@
-import type { ModelKey } from "@/config"
-import type { MoleculeSmiles } from "@/store"
-
 import { xxhash64 } from "hash-wasm"
 import { keys, setMany, createStore, type UseStore } from "idb-keyval"
+
+import type { ModelKey } from "@/config"
+import type { MoleculeSmiles } from "@/store"
 
 // types
 export type FeatureIdx = string
@@ -20,7 +20,7 @@ export interface RunPodInferenceInput {
 // cache
 export const activationsCache: UseStore = createStore("activations", "cache")
 
-// functions
+// utils
 async function postRunpod(input: RunPodInferenceInput):
   Promise<Record<string, Record<FeatureIdx, TokenActivations>>> {
   try {
@@ -60,9 +60,7 @@ function deferVoid() {
 
 function cacheInference() {
   const queue = new Set<MoleculeSmiles>()
-  const waiters = new Map<
-    MoleculeSmiles, ReturnType<typeof deferVoid>
-  >()
+  const waiters = new Map<MoleculeSmiles, ReturnType<typeof deferVoid>>()
   let isFlushing = false
   
   function addQueue(smi: MoleculeSmiles) {
@@ -117,9 +115,9 @@ function cacheInference() {
   return { addQueue, whenReady, flush }
 }
 
+// singleton
 export const inference = cacheInference()
 
-// utils
 export async function hasKey(key: string): Promise<boolean> {
   const allKeys = await keys()
   return allKeys.includes(key)

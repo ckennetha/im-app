@@ -1,24 +1,21 @@
 // types
+export const coreTokenTypes = [
+  "Atom", "Bond", "Ring", "Branch", "Disconnection"
+]
+export type CoreTokenType = typeof coreTokenTypes[number]
+
 export type AtomIdx = number
 export type BondIdx = number
 
-export const coreTokenTypes = [
-  "atom", "bond", "ring", "branch", "disconnection"
-]
-export type CoreTokenType = typeof coreTokenTypes[number]
-type TokenType = CoreTokenType | "other"
-
 export interface Token {
   token: string;
-  type: TokenType;
+  type: CoreTokenType;
   typeIndex: AtomIdx | BondIdx | null;
 }
-
 export interface Edges {
   atomPairs: Array<[AtomIdx, AtomIdx]>;
   bondTokenIdx: number[];
 }
-
 interface Branch {
   startTokenIdx: number;
   endTokenIdx: number;
@@ -26,22 +23,19 @@ interface Branch {
   atomInBetween: number;
 }
 
-// default
-const PATTERNS = {
+const PTRNS = {
   Main: /\[[^\]]+\]|Br?|Cl?|\%[0-9]{2}|N|O|S|P|F|I|b|c|n|o|s|p|\(|\)|\.|=|#|-|\+|\\|\/|:|~|@|\?|>|\*|\$|[0-9]/g,
-  Atom: /[a-zA-Z]/,
+  Atom: /\[[^\]]+]|Br?|Cl?|N|O|S|P|F|I|b|c|n|o|s|p|\*/,
   Bond: /^[-=#\\/]$/,
-  Branch: /^[()]$/,
-  Ring: /^%[0-9]{2}$|^[0-9]$/,
-  Disconnection: /^\.$/
+  Ring: /^%[0-9]{2}$|^[0-9]$/
 }
 
-// function
+// util
 export function tokenize(smi: string): {
   tokens: Token[], edges: Edges
 } {
-  const pattern = PATTERNS.Main
-  pattern.lastIndex = 0
+  const ptrn = PTRNS.Main
+  ptrn.lastIndex = 0
 
   const tokens: Token[] = []
   const edges: Edges = {
@@ -61,13 +55,13 @@ export function tokenize(smi: string): {
   let ptrDepth = -1
 
   let match: RegExpExecArray | null
-  while ((match = pattern.exec(smi)) !== null) {
+  while ((match = ptrn.exec(smi)) !== null) {
     const token = match[0]
-    let tokenType: TokenType | undefined
+    let tokenType: CoreTokenType | undefined
     let typeIndex = null
     
-    if (PATTERNS.Atom.test(token)) {
-      tokenType = 'atom'
+    if (PTRNS.Atom.test(token)) {
+      tokenType = 'Atom'
       typeIndex = atomIdx++
       
       if (isInBranch) { tmpBranch[ptrBranch].atomInBetween++ }
@@ -78,8 +72,8 @@ export function tokenize(smi: string): {
       }
     }
 
-    if (PATTERNS.Branch.test(token)) {
-      tokenType = 'branch'
+    if (token === '(' || token === ')') {
+      tokenType = 'Branch'
       if (token === '(') {
         isInBranch = true
         ptrBranch++
@@ -101,8 +95,8 @@ export function tokenize(smi: string): {
       }
     }
 
-    if (PATTERNS.Bond.test(token)) {
-      tokenType = 'bond'
+    if (PTRNS.Bond.test(token)) {
+      tokenType = 'Bond'
       if (lastToken === ')') {
         let stepBack = allBranch.length - 1
         let passAtoms = 0
@@ -127,8 +121,8 @@ export function tokenize(smi: string): {
       prevIsBond = true
     }
 
-    const type: TokenType = tokenType
-      ?? (PATTERNS.Ring.test(token) ? 'ring' : 'disconnection')
+    const type: CoreTokenType = tokenType
+      ?? (PTRNS.Ring.test(token) ? 'Ring' : 'Disconnection')
     tokens.push({ token, type, typeIndex })
 
     tokenIdx++

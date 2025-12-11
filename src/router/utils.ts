@@ -1,17 +1,12 @@
-import { Models } from "@/config"
-import {
-  DEFAULT_MODEL,
-  DEFAULT_FEATURE,
-  DEFAULT_FEATURE_MAX,
-  ALLOWED_SEARCH_QUERY,
-} from "@/cfg"
 import type { RouteParamValue, RouteLocationNormalized, LocationQueryValue } from "vue-router"
+import { Models } from "@/config"
+import { DEFAULT_MODEL, DEFAULT_FEATURE, DEFAULT_FEATURE_MAX } from "@/defaults"
+
+const ALLOWED_SEARCH_QUERY = new Set<string>(["smi"])
 
 export function firstStr<T extends RouteParamValue | LocationQueryValue>(
   rawValue: T | T[] | undefined
-): string | null | undefined {
-  return Array.isArray(rawValue) ? rawValue[0] : rawValue
-}
+): string | null | undefined { return Array.isArray(rawValue) ? rawValue[0] : rawValue }
 
 export function clampFeature(
   feature: number, min: number, max: number

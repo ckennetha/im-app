@@ -1,12 +1,8 @@
-import { DEFAULT_CONTINUOUS_COLORS } from "@/cfg"
-
 import tinycolor from "tinycolor2"
 import tinygradient from "tinygradient"
+import { DEFAULT_CONTINUOUS_COLORS } from "@/defaults"
 
-// default
-export const DEFAULT_CONTINUOUS_CMAP = buildColorMap(DEFAULT_CONTINUOUS_COLORS, false)
-
-// function
+// utils
 export function buildColorMap(
   gradientMap: tinycolor.ColorInput[], reverse: boolean=false
 ): tinygradient.Instance {
@@ -17,7 +13,7 @@ export function buildColorMap(
 export function mapColorContinuous(
   value: number, gradient: tinygradient.Instance
 ): tinycolor.Instance {
-  const valueCapped = Math.min(value, 1.0)
-  const color = gradient.rgbAt(valueCapped)
-  return color
+  return gradient.rgbAt(Math.min(value, 1.0))
 }
+
+export const DEFAULT_CONTINUOUS_CMAP = buildColorMap(DEFAULT_CONTINUOUS_COLORS, false)

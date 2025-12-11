@@ -1,4 +1,4 @@
-// types
+// type
 export interface Model {
   baseModel: string;
   baseModelLink: string;
@@ -52,5 +52,5 @@ export const Models: Record<string, Model> = {
   },
 }
 
-// types
+// type
 export type ModelKey = keyof typeof Models

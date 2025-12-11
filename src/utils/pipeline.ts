@@ -1,25 +1,19 @@
+import type { JSMol } from "@rdkit/rdkit"
 import type { MoleculeSmiles } from "@/store"
-
 import type { AtomIdx, Token, Edges } from "./tokenize"
 import { tokenize } from "./tokenize"
 
-import type { JSMol } from "@rdkit/rdkit"
-
-// types
+// type
 export interface BondRDKit {
   atoms: [AtomIdx, AtomIdx];
   bo?: number;
 }
 
 // utils
-function mapToBondIdx(
-  bondInfo: BondRDKit[], edges: Edges
-): Map<number, number> {
+function mapToBondIdx(bondInfo: BondRDKit[], edges: Edges): Map<number, number> {
   const bondsMap = new Map<number, number>()
 
-  const pairKey = (a: number, b: number) => (
-    a < b ? `${a}-${b}` : `${b}-${a}`
-  )
+  const pairKey = (a: number, b: number) => (a < b ? `${a}-${b}` : `${b}-${a}`)
 
   const bondIdxByPair: Map<string, number> = new Map()
   bondInfo.forEach((bond, bondIdx) => {
@@ -36,9 +30,7 @@ function mapToBondIdx(
   return bondsMap
 }
 
-function moleculeToTokens(
-  smi: MoleculeSmiles, bondInfo: BondRDKit[]
-): Token[] {
+function moleculeToTokens(smi: MoleculeSmiles, bondInfo: BondRDKit[]): Token[] {
   const { tokens, edges } = tokenize(smi)
   if (edges.bondTokenIdx.length > 0) {
     const bondsMap = mapToBondIdx(bondInfo, edges)

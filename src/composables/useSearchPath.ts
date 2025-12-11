@@ -1,8 +1,6 @@
+import { useRouter, onBeforeRouteUpdate, type LocationQueryRaw } from "vue-router"
 import useModelParam from "./useModelParam"
 import { normalizeRouteSearch } from "@/router/utils"
-
-import type { LocationQueryRaw } from "vue-router"
-import { useRouter, onBeforeRouteUpdate } from "vue-router"
 
 export default function useSearchPath() {
   const model = useModelParam()

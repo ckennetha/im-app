@@ -1,5 +1,5 @@
-import { DEFAULT_CONTINUOUS_CMAP, mapColorContinuous } from "./colors"
 import type { AtomIdx, BondIdx, Token } from "./tokenize"
+import { mapColorContinuous, DEFAULT_CONTINUOUS_CMAP } from "./colors"
 
 // types
 export interface SVGOptions {
@@ -33,10 +33,10 @@ export function activationToColor(
       const { r, g, b, a } = cToken.toRgb()
       const rgbArr: number[] = [r / 255, g / 255, b / 255, a]
       
-      if (tk.type === 'atom') {
+      if (tk.type === 'Atom') {
         svgOptions.atoms.push(tk.typeIndex!)
         svgOptions.highlightAtomColors[tk.typeIndex!] = rgbArr
-      } else if (tk.type === 'bond') {
+      } else if (tk.type === 'Bond') {
         svgOptions.bonds.push(tk.typeIndex!)
         svgOptions.highlightBondColors[tk.typeIndex!] = rgbArr
       }

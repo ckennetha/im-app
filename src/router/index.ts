@@ -1,15 +1,14 @@
-import { Home, About } from "@/components"
-import { DEFAULT_FEATURE, DEFAULT_MODEL } from "@/cfg"
-import { useFromRouteStore } from "@/store"
-
-import { normalizeRouteExplore, normalizeRouteSearch } from "./utils"
 import { createRouter, createWebHashHistory } from "vue-router"
+import { HomePage, AboutPage } from "@/components"
+import { useFromRouteStore } from "@/store"
+import { normalizeRouteExplore, normalizeRouteSearch } from "./utils"
+import { DEFAULT_FEATURE, DEFAULT_MODEL } from "@/defaults"
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: HomePage
   },
   {
     path: '/explore',
@@ -22,7 +21,7 @@ const routes = [
   {
     path: '/explore/:model/:feature',
     name: 'Explore',
-    component: () => import("@/components/Explore.vue"),
+    component: () => import("@/components/ExplorePage.vue"),
     beforeEnter: normalizeRouteExplore
   },
   {
@@ -34,13 +33,13 @@ const routes = [
   {
     path: '/search/:model',
     name: 'Search',
-    component: () => import("@/components/Search.vue"),
+    component: () => import("@/components/SearchPage.vue"),
     beforeEnter: normalizeRouteSearch,
   },
   {
     path: '/about',
     name: 'About',
-    component: About
+    component: AboutPage
   }
 ]
 

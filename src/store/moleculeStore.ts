@@ -1,5 +1,5 @@
-import { defineStore } from "pinia"
 import { ref, computed } from "vue"
+import { defineStore } from "pinia"
 
 // types
 export type MoleculeSmiles = string
@@ -60,5 +60,5 @@ export const useMoleculeStore = defineStore('mol', () => {
   }
 }, { persist: true })
 
-// types
+// type
 export type MoleculeStore = ReturnType<typeof useMoleculeStore>
