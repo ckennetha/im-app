@@ -20,7 +20,7 @@ const isIcon = (name: string | Component<LucideProps>):
     <RouterLink v-if="navItem.path.startsWith('/')" :to="navItem.path">
       {{ navItem.name }}
     </RouterLink>
-    <a v-else :href="navItem.path">
+    <a v-else :href="navItem.path" target="_blank" rel="noopener noreferrer">
       <component
         v-if="isIcon(navItem.name)"
         :is="navItem.name"

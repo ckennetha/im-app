@@ -12,7 +12,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 import { cn } from "@/lib/utils"
-import { conceptColumns, type ConceptData } from "./columns"
+import { getConceptColumns, type ConceptData } from "./columns"
 
 const { data } = defineProps<{ data?: ConceptData[] }>()
 
@@ -21,7 +21,7 @@ const sorting = ref<SortingState>([])
 
 const table = useVueTable({
   get data() { return data ?? [] },
-  get columns() { return conceptColumns },
+  get columns() { return getConceptColumns(data ?? []) },
   getCoreRowModel: getCoreRowModel(),
   getSortedRowModel: getSortedRowModel(),
   onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
@@ -77,7 +77,7 @@ function valueUpdater<T extends Updater<any>>(updaterOrValue: T, ref: Ref) {
         </template>
         <template v-else>
           <TableRow>
-            <TableCell :colspan="conceptColumns.length" class="h-24 text-center">
+            <TableCell :colspan="table.getAllColumns().length" class="h-24 text-center">
               No results.
             </TableCell>
           </TableRow>

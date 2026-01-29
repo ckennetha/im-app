@@ -1,17 +1,23 @@
 <script setup lang="ts">
-import { ref } from "vue"
-import { CircleQuestionMark } from "lucide-vue-next"
-
-import { Button } from "@/components/ui/button"
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 import ConceptsTable from "./concept/ConceptTable.vue"
+import ConceptBadge from "./concept/ConceptBadge.vue"
 import type { ConceptData } from "./concept/columns"
 
-const { descriptions } = defineProps<{ feature: number; descriptions?: ConceptData[] }>()
+import type { AddOnPositions } from "@/composables/useExplorePath"
 
-// state
-const open = ref<boolean>(false)
+const { additional } = defineProps<{
+  feature: number;
+  descriptions?: ConceptData[];
+  additional?: AddOnPositions;
+}>()
+
+console.log(additional)
+
+// position badge
+const posValue = additional?.corr
+const posContent = `Position latent: \u03C1 = ${posValue?.toFixed(2)}`
 </script>
 
 <template>
@@ -19,19 +25,7 @@ const open = ref<boolean>(false)
     <div class="flex flex-1 flex-nowrap items-center gap-x-2">
       <h1 class="text-3xl font-medium">{{ `f/${feature}` }}</h1>
       <TooltipProvider disableClosingTrigger>
-        <Tooltip v-model:open="open">
-          <TooltipTrigger as-child>
-            <Button size="icon" class="size-5 !px-0 !pt-1 !pb-0 !border-none !shadow-none hover:!bg-background"
-              @click="open = !open"
-            >
-              <CircleQuestionMark class="size-5 text-muted-foreground"/>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent :collisionPadding="{ left: 20 }" class="bg-foreground text-background max-w-66.5">
-            We evaluated the concepts on a separate test set of 250,000 randomly sampled
-            SMILES and kept those with a minimum F1 score of 0.50.
-          </TooltipContent>
-        </Tooltip>
+        <ConceptBadge label="P" :value="posValue" :content="posContent"/>
       </TooltipProvider>
     </div>
     <ConceptsTable :data="descriptions" />

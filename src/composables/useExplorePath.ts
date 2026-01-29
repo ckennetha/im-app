@@ -10,9 +10,14 @@ import useModelParam from "./useModelParam"
 import { normalizeRouteExplore, normalizeRouteSearch } from "@/router/utils"
 
 // type
+export interface AddOnPositions {
+  corr: number; propSample: number;
+}
+
 interface ConceptDataJSON {
   description?: ConceptData[];
   samples: Record<string, ActivatorSample[]>;
+  additional?: AddOnPositions;
 }
 
 export default function useExplorePath() {

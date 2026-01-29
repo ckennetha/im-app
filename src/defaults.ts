@@ -10,6 +10,13 @@ export const DEFAULT_CONTINUOUS_COLORS = [
   '#3c7cb7',
   '#1b5b9c'
 ]
+export const DEFAULT_DIVERGING_COLORS = [
+  '#c13738',
+  '#f19c7a',
+  '#e5e5e5',
+  '#87bfda',
+  '#2f79b5',
+]
 export const DEFAULT_CATEGORICAL_COLORS = [
   "#337ea9",
   "#448361",

@@ -4,6 +4,7 @@ import { toast } from "vue-sonner"
 import { Copy, Eye, EyeOff } from "lucide-vue-next"
 
 import { Button } from "@/components/ui/button"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { Molecule1DVisualizer, Molecule2DVisualizer } from "."
 
 import type { Token } from "@/utils/tokenize"
@@ -77,12 +78,16 @@ async function showStructure(idx: number) {
   const svg2DString = mol!.get_svg_with_highlights(svgOptionsString)
   
   mol!.delete()
+
+  const isEmpty = shownStructure.value.length === 0
   shownStructure.value.push(markRaw({ idx, svg2DString }))
   
   await nextTick()
 
-  const el = shownStructureRefs.value[idx]
-  el.scrollIntoView({ behavior: "smooth", block: "center" })
+  if (isEmpty) {
+    const el = shownStructureRefs.value[idx]
+    el.scrollIntoView({ behavior: "smooth", block: "center" })
+  }
 }
 
 const isShown = (idx: number): boolean => {
@@ -100,32 +105,34 @@ const toggleStructureVisibility = (idx: number): void | Promise<void> => {
 <template>
   <div>
     <div class="overflow-x-auto">
-      <div v-for="(tokenVisProp, idx) in tokenVisProps" :key="idx" class="inline-flex flex-nowrap whitespace-nowrap items-center justify-start gap-x-3 w-full last:pb-3">
-        <div class="pt-1">
-          <Button size="icon" class="!px-0 size-5 !border-0 !shadow-none hover:!bg-background group"
-            @click="copyToClipboard(tokenVisProp.tokens)"
-          >
-            <Copy class="!size-4 text-border group-hover:text-muted-foreground group-active:text-background" />
-          </Button>
-          <Button size="icon" class="!px-0 size-5 !border-0 !shadow-none hover:!bg-background group"
-            @click="toggleStructureVisibility(idx)"
-          >
-            <component :is="isShown(idx) ? EyeOff : Eye"
-              :class="cn(
-                '!size-4 group-hover:text-muted-foreground group-active:text-background',
-                isShown(idx) ? 'text-muted-foreground' : 'text-border'
-              )"
+      <TooltipProvider>
+        <div v-for="(tokenVisProp, idx) in tokenVisProps" :key="idx" class="inline-flex flex-nowrap whitespace-nowrap items-center justify-start gap-x-3 w-full last:pb-3">
+          <div class="pt-1">
+            <Button size="icon" class="!px-0 size-5 !border-0 !shadow-none hover:!bg-background group"
+              @click="copyToClipboard(tokenVisProp.tokens)"
+            >
+              <Copy class="!size-4 text-border group-hover:text-muted-foreground group-active:text-background" />
+            </Button>
+            <Button size="icon" class="!px-0 size-5 !border-0 !shadow-none hover:!bg-background group"
+              @click="toggleStructureVisibility(idx)"
+            >
+              <component :is="isShown(idx) ? EyeOff : Eye"
+                :class="cn(
+                  '!size-4 group-hover:text-muted-foreground group-active:text-background',
+                  isShown(idx) ? 'text-muted-foreground' : 'text-border'
+                )"
+              />
+            </Button>
+          </div>
+          <div>
+            <Molecule1DVisualizer
+              :tokens="tokenVisProp.tokens"
+              :activations="tokenVisProp.activationsPerFeature"
+              :colorHexTokens="tokenVisProp.colorHexTokens"
             />
-          </Button>
+          </div>
         </div>
-        <div>
-          <Molecule1DVisualizer
-            :tokens="tokenVisProp.tokens"
-            :activations="tokenVisProp.activationsPerFeature"
-            :colorHexTokens="tokenVisProp.colorHexTokens"
-          />
-        </div>
-      </div>
+      </TooltipProvider>
     </div>
     <div v-if="shownStructure.length > 0" class="grid molecule-grid gap-3 mt-2 mb-8 w-full">
       <Molecule2DVisualizer

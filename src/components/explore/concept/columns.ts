@@ -13,13 +13,13 @@ import { DEFAULT_CATEGORICAL_COLORS } from "@/defaults"
 // types
 export interface ConceptData {
   concept: string;
-  type: 'SMARTS' | 'SubSMILES';
   group: CoreTokenType;
   thresh: number;
   tPos: number;
   precision: number;
   recall: number;
   f1Score: number;
+  tPosSub: number | null;
   comment: string | null;
 }
 
@@ -66,76 +66,90 @@ const groupColors = Object.fromEntries(
 )
 
 // columns
-export const conceptColumns: ColumnDef<ConceptData>[] = [
-  {
-    accessorKey: "concept",
-    header: () => firstColumn("Concept"),
-    cell: ({ getValue }) => firstColumn(getValue<string>()),
-    enablePinning: true
-  },
-  {
-    accessorKey: "type",
-    header: "Type"
-  },
-  {
-    accessorKey: "group",
-    header: "Group",
-    cell: ({ getValue }) => {
-      const group = getValue<CoreTokenType>()
-      return h(
-        Badge,
-        {
-          class: "text-muted",
-          style: { backgroundColor: groupColors[group] ?? "#787774" }
-        },
-        { default: () => group }
-      )
-    },
-    enableSorting: true
-  },
-  {
-    accessorKey: "thresh",
+export const getConceptColumns = (data: ConceptData[]): ColumnDef<ConceptData>[] => {
+  // tPosSub
+  const hasTPosSub: boolean = data.some(row => row.tPosSub !== null)
+  const tPosSubColumn: ColumnDef<ConceptData> = {
+    accessorKey: "tPosSub",
     header: ({ column }) => {
       const sortType = column.getIsSorted()
-      return sortableColumnHeader(column, "Threshold", sortType)
+      return sortableColumnHeader(column, "TPs Substructure", sortType)
     },
+    cell: ({ getValue }) => { return getValue<number | null>() ?? "-" },
     enableSorting: true
-  },
-  {
-    accessorKey: "tPos",
-    header: ({ column }) => {
-      const sortType = column.getIsSorted()
-      return sortableColumnHeader(column, "True Positives", sortType)
+  }
+  
+  // main columns
+  const conceptColumns: ColumnDef<ConceptData>[] = [
+    {
+      accessorKey: "concept",
+      header: () => firstColumn("Concept"),
+      cell: ({ getValue }) => firstColumn(getValue<string>()),
+      enablePinning: true
     },
-    enableSorting: true
-  },
-  {
-    accessorKey: "precision",
-    header: ({ column }) => {
-      const sortType = column.getIsSorted()
-      return sortableColumnHeader(column, "Precision", sortType)
+    {
+      accessorKey: "group",
+      header: "Group",
+      cell: ({ getValue }) => {
+        const group = getValue<CoreTokenType>()
+        return h(
+          Badge,
+          {
+            class: "text-muted",
+            style: { backgroundColor: groupColors[group] ?? "#787774" }
+          },
+          { default: () => group }
+        )
+      },
+      enableSorting: true
     },
-    enableSorting: true
-  },
-  {
-    accessorKey: "recall",
-    header: ({ column }) => {
-      const sortType = column.getIsSorted()
-      return sortableColumnHeader(column, "Recall", sortType)
+    {
+      accessorKey: "thresh",
+      header: ({ column }) => {
+        const sortType = column.getIsSorted()
+        return sortableColumnHeader(column, "Threshold", sortType)
+      },
+      enableSorting: true
     },
-    enableSorting: true
-  },
-  {
-    accessorKey: "f1Score",
-    header: ({ column }) => {
-      const sortType = column.getIsSorted()
-      return sortableColumnHeader(column, "F1 Score", sortType)
+    {
+      accessorKey: "tPos",
+      header: ({ column }) => {
+        const sortType = column.getIsSorted()
+        return sortableColumnHeader(column, "TPs", sortType)
+      },
+      enableSorting: true
     },
-    enableSorting: true
-  },
-  {
-    accessorKey: "comment",
-    header: "Comment",
-    cell: ({ getValue }) => { return getValue<string | null>() ?? "-" }
-  },
-]
+    ...(hasTPosSub ? [tPosSubColumn] : []),
+    {
+      accessorKey: "precision",
+      header: ({ column }) => {
+        const sortType = column.getIsSorted()
+        return sortableColumnHeader(column, "Precision", sortType)
+      },
+      enableSorting: true
+    },
+    {
+      accessorKey: "recall",
+      header: ({ column }) => {
+        const sortType = column.getIsSorted()
+        return sortableColumnHeader(column, "Recall", sortType)
+      },
+      enableSorting: true
+    },
+    {
+      accessorKey: "f1Score",
+      header: ({ column }) => {
+        const sortType = column.getIsSorted()
+        return sortableColumnHeader(column, "F1 Score", sortType)
+      },
+      enableSorting: true
+    },
+    {
+      accessorKey: "comment",
+      header: "Comment",
+      cell: ({ getValue }) => { return getValue<string | null>() ?? "-" }
+    },
+  ]
+
+  return conceptColumns
+}

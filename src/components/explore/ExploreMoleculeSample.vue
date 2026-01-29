@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue"
-import { ChevronDown, CircleQuestionMark } from "lucide-vue-next"
+import { ChevronDown, Info } from "lucide-vue-next"
 
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
@@ -35,37 +35,33 @@ const handleHeader = (label: string): string => {
             <Button size="icon" class="size-5 !px-0 !pt-1 !pb-0 !border-none !shadow-none hover:!bg-background"
               @click="open = !open"
             >
-              <CircleQuestionMark class="size-5 text-muted-foreground"/>
+              <Info class="size-5 text-muted-foreground"/>
             </Button>
           </TooltipTrigger>
-          <TooltipContent :collisionPadding="{ left: 20 }" class="bg-foreground text-background max-w-56 sm:max-w-74">
-            We randomly sampled SMILES from the ~1,300,000 sample pool
-            and grouped them into quintiles by their normalized
-            maximum SAE activation.
+          <TooltipContent :collisionPadding="{ left: 20 }" class="bg-foreground text-background max-w-55 sm:max-w-78">
+            We randomly sampled SMILES and grouped them into quintiles by their normalized maximum SAE activation.
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
     </div>
     <div v-if="samples" class="space-y-3">
       <Collapsible v-for="(sample, label, idx) in samples" :key="label" :defaultOpen="idx === 0" class="border-b-2">
-        <TooltipProvider>
-          <CollapsibleTrigger class="relative flex flex-1 items-center justify-between mb-3 !p-0 w-full !border-none !rounded-none hover:underline [&[data-state=open]>svg]:rotate-180">
-            <h2 class="text-xl text-left">{{ handleHeader(label) }}</h2>
-            <ChevronDown class="size-4 text-muted-foreground transition-transform duration-200"/>
-          </CollapsibleTrigger>
-          <CollapsibleContent class="w-full">
-            <Suspense>
-              <template #default>
-                <MoleculeSampleVisualizer :sample />
-              </template>
-              <template #fallback>
-                <div class="flex items-center justify-center h-48 overflow-y-hidden">
-                  <img src="/im-spinner.svg" class="animate-spin h-24"/>
-                </div>
-              </template>
-            </Suspense>
-          </CollapsibleContent>
-        </TooltipProvider>
+        <CollapsibleTrigger class="relative flex flex-1 items-center justify-between mb-3 !p-0 w-full !border-none !rounded-none hover:underline [&[data-state=open]>svg]:rotate-180">
+          <h2 class="text-xl text-left">{{ handleHeader(label) }}</h2>
+          <ChevronDown class="size-4 text-muted-foreground transition-transform duration-200"/>
+        </CollapsibleTrigger>
+        <CollapsibleContent class="w-full">
+          <Suspense>
+            <template #default>
+              <MoleculeSampleVisualizer :sample />
+            </template>
+            <template #fallback>
+              <div class="flex items-center justify-center h-48 overflow-y-hidden">
+                <img src="/im-spinner.svg" class="animate-spin h-24"/>
+              </div>
+            </template>
+          </Suspense>
+        </CollapsibleContent>
       </Collapsible>
     </div>
     <div v-else class="flex items-center justify-center h-48 overflow-y-hidden">

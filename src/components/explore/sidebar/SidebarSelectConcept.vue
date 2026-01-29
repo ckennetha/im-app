@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import { ref } from "vue"
+import { Info } from "lucide-vue-next"
+
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 import { coreTokenTypes, type CoreTokenType } from "@/utils/tokenize"
 import { DEFAULT_CATEGORICAL_COLORS } from "@/defaults"
@@ -11,11 +16,30 @@ const { concepts } = defineProps<{ concepts: Record<CoreTokenType, Record<string
 const groupColors = Object.fromEntries(
   coreTokenTypes.map((cTT, idx) => [cTT, DEFAULT_CATEGORICAL_COLORS[idx]])
 )
+
+// state
+const open = ref<boolean>(false)
 </script>
 
 <template>
 	<Select>
-    <Label>Or select a concept:</Label>
+    <div class="flex flex-row gap-x-1">
+      <Label>Or select a concept:</Label>
+      <TooltipProvider>
+        <Tooltip v-model:open="open">
+          <TooltipTrigger as-child>
+            <Button size="icon" class="size-3 !px-0 !pt-1 !pb-0 !border-none !shadow-none hover:!bg-background"
+              @click="open = !open"
+            >
+              <Info class="size-3 text-muted-foreground"/>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent :collisionPadding="{ left: 20 }" class="bg-foreground text-background max-w-71">
+            We evaluated the concepts on a separate test set of 250,000 randomly sampled SMILES and kept those concepts with a minimum F1 score of 0.50.
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
     <SelectTrigger id="concept" class="w-full !bg-background">
       <SelectValue class="text-sm"/>
     </SelectTrigger>
