@@ -13,8 +13,6 @@ const { additional } = defineProps<{
   additional?: AddOnPositions;
 }>()
 
-console.log(additional)
-
 // position badge
 const posValue = additional?.corr
 const posContent = `Position latent: \u03C1 = ${posValue?.toFixed(2)}`
