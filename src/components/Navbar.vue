@@ -16,9 +16,9 @@ const navItems = [
   { name: "Explore", path: "/explore" },
   { name: "Search", path: "/search" },
   { name: "About", path: "/about" },
-  { name: "Preprint", path: "javascript:;" },
-  { name: "Contact", path: "javascript:;" },
-  { name: Github, path: "javascript:;" },
+  { name: "Preprint", path: "https://doi.org/10.48550/arXiv.2606.23443" },
+  { name: "Contact", path: "mailto:kennethasikinnn@gmail.com" },
+  { name: Github, path: "https://github.com/ckennetha/intermol" },
 ]
 </script>
 

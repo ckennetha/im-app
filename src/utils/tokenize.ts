@@ -16,12 +16,6 @@ export interface Edges {
   atomPairs: Array<[AtomIdx, AtomIdx]>;
   bondTokenIdx: number[];
 }
-interface Branch {
-  startTokenIdx: number;
-  endTokenIdx: number;
-  depth: number;
-  atomInBetween: number;
-}
 
 const PTRNS = {
   Main: /\[[^\]]+\]|Br?|Cl?|\%[0-9]{2}|N|O|S|P|F|I|b|c|n|o|s|p|\(|\)|\.|=|#|-|\+|\\|\/|:|~|@|\?|>|\*|\$|[0-9]/g,
@@ -38,95 +32,75 @@ export function tokenize(smi: string): {
   ptrn.lastIndex = 0
 
   const tokens: Token[] = []
-  const edges: Edges = {
-    atomPairs: [], bondTokenIdx: []
-  }
+  const edges: Edges = { atomPairs: [], bondTokenIdx: [] }
 
   let tokenIdx = 0
-  let lastToken: string = ''
   let atomIdx = 0
-  let ptrAtomStack = 0
   let prevIsBond = false
+  let pendingEdgeIdx = -1
 
-  const allBranch: Branch[] = []
-  const tmpBranch: Branch[] = []
-  let isInBranch = false
-  let ptrBranch = -1
-  let ptrDepth = -1
+  let currentAtomIdx = -1
+  const branchStack: number[] = []
+
+  const ringOpens = new Map<string, { atomIdx: number; bondTokenIdx: number }>()
 
   let match: RegExpExecArray | null
   while ((match = ptrn.exec(smi)) !== null) {
     const token = match[0]
     let tokenType: CoreTokenType | undefined
-    let typeIndex = null
+    let typeIndex: number | null = null
     
     if (PTRNS.Atom.test(token)) {
       tokenType = 'Atom'
       typeIndex = atomIdx++
-      
-      if (isInBranch) { tmpBranch[ptrBranch].atomInBetween++ }
       if (prevIsBond) {
-        edges.atomPairs[ptrAtomStack][1] = typeIndex
-        ptrAtomStack++
+        edges.atomPairs[pendingEdgeIdx][1] = typeIndex
         prevIsBond = false
+        pendingEdgeIdx = -1
       }
+      currentAtomIdx = typeIndex
     }
 
-    if (token === '(' || token === ')') {
+    else if (token === '(' || token === ')') {
       tokenType = 'Branch'
       if (token === '(') {
-        isInBranch = true
-        ptrBranch++
-        ptrDepth++
-
-        tmpBranch.push({
-          startTokenIdx: tokenIdx,
-          endTokenIdx: -1,
-          depth: ptrDepth,
-          atomInBetween: 0
-        })
+        branchStack.push(currentAtomIdx)
       } else {
-        tmpBranch[ptrBranch].endTokenIdx = tokenIdx
-        allBranch.push(tmpBranch.pop()!)
-
-        isInBranch = ptrDepth === 0 ? false : true
-        ptrBranch--
-        ptrDepth--
+        currentAtomIdx = branchStack.pop()!
       }
     }
 
-    if (PTRNS.Bond.test(token)) {
+    else if (PTRNS.Bond.test(token)) {
       tokenType = 'Bond'
-      if (lastToken === ')') {
-        let stepBack = allBranch.length - 1
-        let passAtoms = 0
-        while (stepBack >= 0) {
-          const lastBranch = allBranch[stepBack]
-          const tokenBeforeBranchIdx = lastBranch.startTokenIdx - 1
-          passAtoms += lastBranch.atomInBetween
-
-          if (tokens[tokenBeforeBranchIdx].token === ')') {
-            stepBack--
-          } else {
-            edges.atomPairs[ptrAtomStack] = [
-              atomIdx - passAtoms - 1, -1
-            ]
-            break
-          }
-        }
-      } else {
-        edges.atomPairs[ptrAtomStack] = [atomIdx - 1, -1]
-      }
+      pendingEdgeIdx = edges.atomPairs.length
+      edges.atomPairs.push([currentAtomIdx, -1])
       edges.bondTokenIdx.push(tokenIdx)
       prevIsBond = true
     }
 
-    const type: CoreTokenType = tokenType
-      ?? (PTRNS.Ring.test(token) ? 'Ring' : 'Disconnection')
-    tokens.push({ token, type, typeIndex })
+    else if (PTRNS.Ring.test(token)) {
+      let ringBondTokenIdx = -1
+      if (prevIsBond) {
+        edges.atomPairs.pop()
+        ringBondTokenIdx = edges.bondTokenIdx.pop()!
+        prevIsBond = false
+        pendingEdgeIdx = -1
+      }
 
+      if (ringOpens.has(token)) {
+        const open = ringOpens.get(token)!
+        const bti = open.bondTokenIdx !== -1 ? open.bondTokenIdx : ringBondTokenIdx
+        edges.atomPairs.push([open.atomIdx, currentAtomIdx])
+        edges.bondTokenIdx.push(bti)
+        ringOpens.delete(token)
+      } else {
+        ringOpens.set(token, { atomIdx: currentAtomIdx, bondTokenIdx: ringBondTokenIdx })
+      }
+    }
+
+    const type: CoreTokenType = tokenType ?? 'Disconnection'
+    tokens.push({ token, type, typeIndex })
     tokenIdx++
-    lastToken = token
   }
   return { tokens, edges }
 }

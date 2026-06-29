@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from "vue-router"
-import { HomePage } from "@/components"
+import { HomePage, AboutPage } from "@/components"
 import { useFromRouteStore } from "@/store"
 import { normalizeRouteExplore, normalizeRouteSearch } from "./utils"
 import { DEFAULT_FEATURE, DEFAULT_MODEL } from "@/defaults"
@@ -39,7 +39,7 @@ const routes = [
   {
     path: '/about',
     name: 'About',
-    redirect: '/'
+    component: AboutPage
   }
 ]
 
