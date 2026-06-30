@@ -3,6 +3,7 @@ import { computed, ref, reactive, watch, nextTick, onMounted } from "vue"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Collapsible } from "@/components/ui/collapsible"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
@@ -34,6 +35,9 @@ const isPacking = ref<boolean>(false)
 const isLoading = computed<boolean>(() => isPacking.value || countStatus.activeRenders > 0)
 const hasNoMolecules = computed<boolean>(() => moleculeStore.countMolecule === 0)
 
+const canonicalize = ref<boolean>(true)
+const appliedCanonicalize = ref<boolean>(true)
+
 // ketcher handler
 // state
 const useMoleculeDrawer = ref<boolean>(false)
@@ -43,6 +47,7 @@ const { statusKetcher, onDrawToSmiles } = useKetcher()
 async function packInputMolecule() {
   isPacking.value = true
   try {
+    appliedCanonicalize.value = canonicalize.value
     packedMolecule.value = null
     await nextTick()
     packedMolecule.value = moleculeStore.parseMolecule()
@@ -65,6 +70,15 @@ onMounted(async () => {
     }
   }
 })
+
+watch(
+  [() => props.model, () => props.feature],
+  () => {
+    if (canonicalize.value !== appliedCanonicalize.value) {
+      canonicalize.value = appliedCanonicalize.value
+    }
+  }
+)
 
 watch(
   [() => countStatus.activeRenders, () => countStatus.queuedRenders],
@@ -95,18 +109,26 @@ watch(
       :count="moleculeStore.countMolecule"
       :maxMolecules="DEFAULT_EXPLORE_MOLECULE_MAX"
     />
-    <div :class="cn('flex items-center w-full', useMoleculeDrawer && 'justify-end sm:justify-between')">
+    <div v-if="doInference"
+      :class="cn('flex items-center w-full', useMoleculeDrawer && 'justify-end sm:justify-between')"
+    >
       <div :class="cn('flex gap-x-2', useMoleculeDrawer && 'hidden sm:flex')">
         <Button :disabled="hasNoMolecules || isLoading" @click="moleculeStore.setMolecule('')">
           Clear
         </Button>
-        <Button v-if="doInference" variant="secondary"
+        <Button variant="secondary"
           :disabled="hasNoMolecules || statusKetcher.isKetcherBusy || isLoading"
           @click="packInputMolecule"
         >
           <Spinner v-if="isLoading" class="size-4 !text-background" />
           {{ isLoading ? 'Loading...' : 'Submit' }}
         </Button>
+        <div class="flex items-center gap-x-3 ms-3">
+          <Checkbox id="canonicalize" v-model="canonicalize"
+            class="size-[18px] data-[state=checked]:border-border"
+          />
+          <Label for="canonicalize">Canonicalize</Label>
+        </div>
       </div>
       <Button v-if="useMoleculeDrawer" variant="secondary" class="justify-items-end"
         :disabled="statusKetcher.isKetcherBusy || isLoading"
@@ -122,6 +144,7 @@ watch(
           :feature="feature"
           :id="pMol.id"
           :smi="pMol.smiles"
+          :canonicalize="appliedCanonicalize"
           @loading="onCardLoading"
           @running-inference="onQueued"
         />

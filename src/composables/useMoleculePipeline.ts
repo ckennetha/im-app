@@ -13,19 +13,19 @@ import { activationsCache, inference, type FeatureIdx, type TokenActivations } f
 // types
 export type PipelineStage = "idle" | "tokenizing" | "running-inference" | "visualizing"
 
-interface canonicalizeOutput {
-  validSmiles: MoleculeSmiles;
+interface ProcessOutput {
+  smiles: MoleculeSmiles;
   bondInfo: BondRDKit[];
 }
 
 interface PipelineOutput {
   isSmilesInvalid: Ref<boolean>;
   statusPipeline: Ref<PipelineStage>;
-  canonSmiles: Ref<MoleculeSmiles | null>;
+  validSmiles: Ref<MoleculeSmiles | null>;
   tokens: ShallowRef<Token[]>;
   activations: ShallowRef<Record<FeatureIdx, TokenActivations> | null>;
   processor: (
-    smi: MoleculeSmiles, model: ModelKey, RDKit: RDKitModule
+    smi: MoleculeSmiles, model: ModelKey, RDKit: RDKitModule, canonicalize?: boolean
   ) => Promise<void>;
 }
 
@@ -37,55 +37,58 @@ async function fetchFromCache(model: ModelKey, smi: MoleculeSmiles):
   }
 
 
-export function useMoleculePipeline(
-  withInference: boolean=false
-): PipelineOutput {
+export function useMoleculePipeline(withInference: boolean=false): PipelineOutput {
   // status
   const isSmilesInvalid = ref<boolean>(false)
   const statusPipeline = ref<PipelineStage>("idle")
 
   // states
-  const canonSmiles = ref<MoleculeSmiles | null>(null)
+  const validSmiles = ref<MoleculeSmiles | null>(null)
   const tokens = shallowRef<Token[]>([])
   const activations = shallowRef<
     Record<FeatureIdx, TokenActivations> | null>(null)
   
   // handler
-  function canonicalizeSmilesWithBondInfo (RDKit: RDKitModule, smi: string):
-    canonicalizeOutput | null {
+  function processSmilesWithBondInfo (
+    RDKit: RDKitModule, smi: string, canonicalize: boolean
+  ): ProcessOutput | null {
       const mol = RDKit.get_mol(smi)
       if (!mol) {
         isSmilesInvalid.value = true
         return null
       }
-      const validSmiles = mol.get_smiles()
+      const smiles = canonicalize ? mol.get_smiles() : smi
       const bondInfo = getBondInfo(mol)
       mol.delete()
-      return { validSmiles, bondInfo }
+      return { smiles, bondInfo }
   }
 
   // async processor
   async function processor(
-    smi: MoleculeSmiles, model: ModelKey, RDKit: RDKitModule
+    smi: MoleculeSmiles, model: ModelKey, RDKit: RDKitModule, canonicalize: boolean=true
   ): Promise<void> {
-    const out = canonicalizeSmilesWithBondInfo(RDKit, smi)
+    isSmilesInvalid.value = false
     
+    const out = processSmilesWithBondInfo(RDKit, smi, canonicalize)
     if (!out) return
-    const { validSmiles, bondInfo } = out
+    const { smiles, bondInfo } = out
     
-    canonSmiles.value = validSmiles
-    tokens.value = moleculeToTokens(validSmiles, bondInfo)
+    validSmiles.value = smiles
+    statusPipeline.value = "tokenizing"
+    tokens.value = moleculeToTokens(smiles, bondInfo)
 
     if (!withInference) return
-    activations.value = await fetchFromCache(model, canonSmiles.value!)
-    if (!activations.value) {
-      inference.addQueue(canonSmiles.value!)
-      statusPipeline.value = "running-inference"
-      await inference.whenReady(canonSmiles.value!)
 
-      activations.value = await fetchFromCache(model, canonSmiles.value!)
+    const cacheKey = validSmiles.value!
+    activations.value = await fetchFromCache(model, cacheKey)
+    if (!activations.value) {
+      inference.addQueue(cacheKey)
+      statusPipeline.value = "running-inference"
+      await inference.whenReady(cacheKey)
+
+      activations.value = await fetchFromCache(model, cacheKey)
       if (!activations.value) {
-        throw new Error("Activations cannot be computed")
+        throw new Error("Activations cannot be computed.")
       }
     }
   }
@@ -93,7 +96,7 @@ export function useMoleculePipeline(
   return {
     isSmilesInvalid,
     statusPipeline,
-    canonSmiles,
+    validSmiles,
     tokens,
     activations,
     processor,

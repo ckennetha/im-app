@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
-import { MoleculeSampleVisualizer, type ActivatorSample } from "./molecule"
+import { MoleculeSampleVisualizer, type FeatureSample } from "./molecule"
 
-const { samples } = defineProps<{ samples: Record<string, ActivatorSample[]> }>()
+const { samples } = defineProps<{ samples: Record<string, FeatureSample[]> }>()
 
 // state
 const open = ref<boolean>(false)

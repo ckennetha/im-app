@@ -3,21 +3,23 @@ import { useRoute, useRouter, onBeforeRouteUpdate } from "vue-router"
 import { useFetch } from "@vueuse/core"
 
 import type { ConceptData } from "@/components/explore/concept/columns"
-import type { ActivatorSample } from "@/components/explore/molecule"
+import type { FeatureSample } from "@/components/explore/molecule"
 import type { ModelKey } from "@/config"
 
 import useModelParam from "./useModelParam"
 import { normalizeRouteExplore, normalizeRouteSearch } from "@/router/utils"
 
 // type
-export interface AddOnPositions {
-  corr: number; propSample: number;
+export interface PositionInfo {
+  corr: number;
+  averageTokenLength: number;
+  numSamples: number;
 }
 
 interface ConceptDataJSON {
-  description?: ConceptData[];
-  samples: Record<string, ActivatorSample[]>;
-  additional?: AddOnPositions;
+  concepts?: ConceptData[];
+  samples: Record<string, FeatureSample[]>;
+  extras?: { positionInfo: PositionInfo };
 }
 
 export default function useExplorePath() {
@@ -38,8 +40,8 @@ export default function useExplorePath() {
     },
   })
 
-  const url = computed<string>(() => `https://api.github.com/repos/ckennetha/im-data/contents/${model.value}/${feature.value}.json?ref=main`)
-  const { data, statusCode, execute, abort } = useFetch(url, { immediate: false }).json()
+  const url = computed<string>(() => `https://raw.githubusercontent.com/ckennetha/im-data/restruct/${model.value}/${feature.value}.json`)
+  const { data, statusCode, execute, abort } = useFetch(url, { immediate: false }).json<ConceptDataJSON>()
   const conceptJSON = shallowRef<ConceptDataJSON | null>(null)
 
   function setBoth(next: { model: ModelKey; feature: number }) {
@@ -72,7 +74,7 @@ export default function useExplorePath() {
         console.error(`Error status code: ${statusCode.value}`)
         return
       }
-      conceptJSON.value = JSON.parse(atob(data.value.content))
+      conceptJSON.value = data.value
       data.value = null
     },
   { immediate: true })

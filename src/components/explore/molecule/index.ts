@@ -5,7 +5,7 @@ export { default as Molecule2DVisualizer } from "./Molecule2DVisualizer.vue"
 export { default as MoleculeSampleVisualizer } from "./MoleculeSampleVisualizer.vue"
 
 // type
-export interface ActivatorSample {
+export interface FeatureSample {
     smiles: string;
-    activations: number[];
+    activations: [number, number][];
 }

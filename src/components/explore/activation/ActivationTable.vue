@@ -143,20 +143,10 @@ defineExpose({ table, rowSelection })
 
 <style scoped>
 :deep(button[data-slot="checkbox"]) {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
   border: 1px solid oklch(0.922 0 0);
   box-shadow: 0 0 #0000;
-
-  &[data-state="checked"],
-  &[data-state="indeterminate"] {
-    color: var(--secondary-foreground);
-    background-color: var(--secondary);
-  }
-
-  &[data-state="indeterminate"] {
-    opacity: 50%;
-  }
 }
 </style>

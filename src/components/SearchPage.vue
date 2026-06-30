@@ -5,6 +5,7 @@ import { xxhash64 } from "hash-wasm"
 
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
 import { Button } from "./ui/button"
+import { Checkbox } from "./ui/checkbox"
 import { Label } from "./ui/label"
 import { Spinner } from "./ui/spinner"
 import { Switch } from "./ui/switch"
@@ -26,11 +27,12 @@ const route = useRoute()
 const { model, pushQuery } = useSearchPath()
 const { statusKetcher, onDrawToSmiles } = useKetcher()
 const {
-  isSmilesInvalid, statusPipeline, canonSmiles, tokens, activations, processor,
+  isSmilesInvalid, statusPipeline, validSmiles, tokens, activations, processor,
 } = useMoleculePipeline(true)
 
 const doInference = computed<boolean>(() => Models[model.value].doInference)
 const useMoleculeDrawer = ref<boolean>(false)
+const canonicalize = ref<boolean>(true)
 const idMolecule = ref<string>("")
 const rawSmi = ref<string>("")
 
@@ -41,14 +43,14 @@ async function wrapperProcessor(smi: string) {
     statusPipeline.value = "tokenizing"
 
     // reset
-    canonSmiles.value = null
+    validSmiles.value = null
     tokens.value = []
     activations.value = null
 
     idMolecule.value = await xxhash64(`${model}:${smi}`)
 
     const RDKit = await initRDKit()
-    await processor(smi, model.value, RDKit)
+    await processor(smi, model.value, RDKit, canonicalize.value)
 
     if (!tokens.value) {
       throw new Error("Invalid SMILES string!")
@@ -61,9 +63,7 @@ async function wrapperProcessor(smi: string) {
 }
 
 async function searchFeatures() {
-  if (useMoleculeDrawer.value) {
-    await onDrawToSmiles(rawSmi)
-  }
+  if (useMoleculeDrawer.value) { await onDrawToSmiles(rawSmi) }
   pushQuery({ smi: rawSmi.value })
 }
 
@@ -110,13 +110,21 @@ watch(() => statusPipeline.value, async () => {
         >
         </MoleculeInput>
         <div class="mt-3">
-          <Button v-if="doInference" variant="secondary" class="justify-center w-full"
-            :disabled="!doInference || statusPipeline !== 'idle'"
-            @click="searchFeatures"
-          >
-            <Spinner v-if="statusPipeline !== 'idle'" class="size-4 !text-background" />
-            {{ statusPipeline === 'idle' ? 'Search' : 'Loading...' }}
-          </Button>
+          <div v-if="doInference" class="flex flex-row items-center gap-x-5">
+            <Button variant="secondary" class="flex-[4] justify-center"
+              :disabled="!doInference || statusPipeline !== 'idle'"
+              @click="searchFeatures"
+            >
+              <Spinner v-if="statusPipeline !== 'idle'" class="size-4 !text-background" />
+              {{ statusPipeline === 'idle' ? 'Search' : 'Loading...' }}
+            </Button>
+            <div class="flex flex-[1] items-center justify-center gap-x-3">
+              <Checkbox id="canonicalize" v-model="canonicalize"
+                class="size-[18px] data-[state=checked]:border-border"
+              />
+              <Label for="canonicalize">Canonicalize</Label>
+            </div>
+          </div>
           <Alert v-else class="warn justify-items-center text-center">
             <AlertTitle>This model is not available for inference.</AlertTitle>
             <AlertDescription>Try MOL-1-3072-128 or MOL-9-3072-128.</AlertDescription>
@@ -133,7 +141,7 @@ watch(() => statusPipeline.value, async () => {
           <template #default>
             <SearchPageContent
               :model
-              :smiles="canonSmiles!"
+              :smiles="validSmiles!"
               :tokens
               :activations
               :isInSearchPage="true"

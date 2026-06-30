@@ -5,7 +5,6 @@ import type { ColumnDef } from "@tanstack/vue-table"
 import type { RDKitModule } from "@rdkit/rdkit"
 
 import { CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Label } from "@/components/ui/label"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
 import {
@@ -21,12 +20,17 @@ import { cn } from "@/lib/utils"
 import initRDKit from "@/utils/initRDKit"
 import { activationToColor } from "@/utils/visualizer"
 
-const props = defineProps<{
-  model: ModelKey; feature: number; id: string; smi: string;
+const { model, feature, id, smi, canonicalize = true } = defineProps<{
+  model: ModelKey;
+  feature: number;
+  id: string;
+  smi: string;
+  canonicalize?: boolean;
 }>()
 
 const emit = defineEmits<{
-  (e: 'loading', v: boolean): void; (e: PipelineStage): void;
+  (e: 'loading', v: boolean): void;
+  (e: PipelineStage): void;
 }>()
 
 // type
@@ -43,12 +47,12 @@ const activationsAtFeature = shallowRef<number[]>([])
 const visProps = shallowRef<VisualizerProps>({ colorHexTokens: [], svg2DString: "" })
 
 const {
-  isSmilesInvalid, statusPipeline, canonSmiles, tokens, activations, processor,
+  isSmilesInvalid, statusPipeline, validSmiles, tokens, activations, processor,
 } = useMoleculePipeline(true)
 
 // utils
 function getActivationsAtFeature() {
-  const featureActivations = activations.value?.[String(props.feature)]
+  const featureActivations = activations.value?.[String(feature)]
   const tmpActivations = new Array(tokens.value?.length).fill(0.0)
   if (featureActivations) {
     const { data, indices } = featureActivations
@@ -64,7 +68,7 @@ function getVisualization(RDKit: RDKitModule) {
     tokens.value, activationsAtFeature.value, true
   )
 
-  const mol = RDKit!.get_mol(canonSmiles.value!)
+  const mol = RDKit!.get_mol(validSmiles.value!)
   const svg2DString = mol!.get_svg_with_highlights(svgOptionsString!)
   mol!.delete()
 
@@ -76,9 +80,9 @@ onMounted(async () => {
     statusPipeline.value = "tokenizing"
     emit('loading', true)
     const RDKit = await initRDKit()
-    await processor(props.smi, props.model, RDKit)
+    await processor(smi, model, RDKit, canonicalize)
 
-    if (!tokens.value) {
+    if (isSmilesInvalid.value || tokens.value.length === 0) {
       throw new Error("Invalid SMILES string!")
     }
 
@@ -100,7 +104,7 @@ onMounted(async () => {
   }
 })
 
-watch([() => props.model, () => props.feature], async (
+watch([() => model, () => feature], async (
   [newModel], [oldModel]
 ) => {
   try {
@@ -111,16 +115,14 @@ watch([() => props.model, () => props.feature], async (
     const RDKit = await initRDKit()
     if (newModel !== oldModel) {
       data.value = null
-      await processor(props.smi, newModel, RDKit)
+      await processor(smi, newModel, RDKit, canonicalize)
 
       if (!activations.value) {
         throw new Error("No activation data.")
       }
       
       columns.value = createActivationColumns(tokens.value, false)
-      data.value = toFlatTokenActivation(
-        activations.value
-      )
+      data.value = toFlatTokenActivation(activations.value)
     }
 
     getActivationsAtFeature()
@@ -149,15 +151,14 @@ watch(statusPipeline, (newStage) => emit(newStage))
   >
     <CollapsibleTrigger as-child>
       <div v-if="statusPipeline === 'idle'" class="relative w-full h-full">
-        <Label
+        <p
           :class="cn(
-            'absolute inline-block top-0 left-0 max-w-3/4 px-3 py-2',
-            'bg-foreground/5 rounded-tl-md truncate cursor-pointer',
+            'absolute inline-block top-0 left-0 max-w-3/4 px-3 py-2 text-sm font-medium bg-foreground/5 rounded-tl-md truncate cursor-pointer',
             isSmilesInvalid ? 'pointer-events-none' : ''
           )"
         >
           {{ id }}
-        </Label>
+        </p>
         <button :aria-label="`Show ${id}`" :disabled="isSmilesInvalid">
           <template v-if="!isSmilesInvalid">
             <img :src="`data:image/svg+xml;charset=utf-8,${encodeURIComponent(visProps?.svg2DString!)}`"
@@ -178,7 +179,9 @@ watch(statusPipeline, (newStage) => emit(newStage))
     <CollapsibleContent>
       <div class="space-y-5 px-5 pb-3 text-center">
         <div class="space-y-2">
-          <h2 class="text-xl font-medium">Canonical SMILES</h2>
+          <h2 class="text-xl font-medium">
+            {{ canonicalize ? "Canonical SMILES" : "SMILES" }}
+          </h2>
           <div class="w-full overflow-x-auto">
             <div class="inline-flex flex-nowrap">
               <TooltipProvider>
@@ -194,7 +197,7 @@ watch(statusPipeline, (newStage) => emit(newStage))
         <div v-if="columns && data" class="space-y-2 mb-2">
           <div class="flex flex-row flex-wrap justify-center gap-x-1">
             <h2 class="text-xl font-medium">Activated Features</h2>
-            <RouterLink :to="{ name: 'Search', params: { model }, query: { smi: canonSmiles } }" target="_blank">
+            <RouterLink :to="{ name: 'Search', params: { model }, query: { smi: validSmiles } }" target="_blank">
               <SquareArrowOutUpRight class="size-3"/>
             </RouterLink>
           </div>

@@ -8,14 +8,14 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { Molecule1DVisualizer, Molecule2DVisualizer } from "."
 
 import type { Token } from "@/utils/tokenize"
-import type { ActivatorSample } from "."
+import type { FeatureSample } from "."
 
 import { cn } from "@/lib/utils"
 import initRDKit from "@/utils/initRDKit"
 import { getBondInfo, moleculeToTokens } from "@/utils/pipeline"
 import { activationToColor } from "@/utils/visualizer"
 
-const { sample } = defineProps<{ sample: ActivatorSample[] }>()
+const { sample } = defineProps<{ sample: FeatureSample[] }>()
 
 // types
 interface TokenVisProps {
@@ -34,6 +34,13 @@ interface ExploreSVGVis {
 const shownStructure = ref<ExploreSVGVis[]>([])
 const shownStructureRefs = ref<Record<number, HTMLElement>>({})
 
+// workflow-utils
+function expandActivations(sparse: [number, number][], length: number): number[] {
+  const dense = new Array(length).fill(0)
+  for (const [idx, val] of sparse) { dense[idx] = val }
+  return dense
+}
+
 // workflow
 const RDKit = await initRDKit()
 const tokenVisProps: TokenVisProps[] = []
@@ -44,11 +51,12 @@ for (const { smiles, activations } of sample) {
   mol!.delete()
   
   const tokens = moleculeToTokens(smiles, bondInfo)
-  const { colorHexTokens, svgOptionsString } = activationToColor(tokens, activations, true)
+  const denseActivations = expandActivations(activations, tokens.length)
+  const { colorHexTokens, svgOptionsString } = activationToColor(tokens, denseActivations, true)
 
   tokenVisProps.push({
     tokens,
-    activationsPerFeature: activations,
+    activationsPerFeature: denseActivations,
     colorHexTokens,
     svgOptionsString
   })

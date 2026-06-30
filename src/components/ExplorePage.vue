@@ -10,8 +10,8 @@ const { model, feature, conceptJSON } = useExplorePath()
   <MainSidebar>
     <ExploreConcept v-if="conceptJSON"
       :feature="feature"
-      :descriptions="conceptJSON.description"
-      :additional="conceptJSON.additional"
+      :concepts="conceptJSON.concepts"
+      :position-info="conceptJSON.extras?.positionInfo"
     />
     <div v-else class="flex flex-col items-center justify-center py-3 h-36">
       <img src="/im-spinner.svg" class="animate-spin h-full"/>

@@ -199,7 +199,7 @@ export function createActivationColumns(
 
           return h(
             "div",
-            { class: "flex flex-row justify-center gap-x-3" },
+            { class: "flex flex-row items-center justify-center gap-x-2" },
             { default: () => [
               h(
                 Checkbox,

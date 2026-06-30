@@ -5,16 +5,16 @@ import ConceptsTable from "./concept/ConceptTable.vue"
 import ConceptBadge from "./concept/ConceptBadge.vue"
 import type { ConceptData } from "./concept/columns"
 
-import type { AddOnPositions } from "@/composables/useExplorePath"
+import type { PositionInfo } from "@/composables/useExplorePath"
 
-const { additional } = defineProps<{
+const { positionInfo } = defineProps<{
   feature: number;
-  descriptions?: ConceptData[];
-  additional?: AddOnPositions;
+  concepts?: ConceptData[];
+  positionInfo?: PositionInfo;
 }>()
 
 // position badge
-const posValue = additional?.corr
+const posValue = positionInfo?.corr
 const posContent = `Position latent: \u03C1 = ${posValue?.toFixed(2)}`
 </script>
 
@@ -26,6 +26,6 @@ const posContent = `Position latent: \u03C1 = ${posValue?.toFixed(2)}`
         <ConceptBadge label="P" :value="posValue" :content="posContent"/>
       </TooltipProvider>
     </div>
-    <ConceptsTable :data="descriptions" />
+    <ConceptsTable :data="concepts" />
   </div>
 </template>

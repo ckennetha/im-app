@@ -66,7 +66,7 @@ body {
   min-height: 100vh;
 }
 
-button {
+button:where(:not([role="checkbox"])) {
   border-radius: 8px;
   border: 1px solid oklch(0.922 0 0);
   padding: 0.6em 1.2em;
