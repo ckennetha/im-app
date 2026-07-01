@@ -38,7 +38,7 @@ function onUpdateTokenTypes(v: unknown) {
         <Funnel class="!size-4 text-muted-foreground group-hover:text-foreground" />
       </Button>
     </PopoverTrigger>
-    <PopoverContent side="right" class="space-y-5 max-w-56">
+    <PopoverContent class="mx-3 space-y-5 max-w-56">
       <div class="flex flex-1 items-center justify-between mb-5">
         <h2 class="text-base leading-none font-medium">Filter by:</h2>
         <Button size="icon"

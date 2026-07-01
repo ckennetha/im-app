@@ -34,7 +34,7 @@ const open = ref<boolean>(false)
               <Info class="size-3 text-muted-foreground"/>
             </Button>
           </TooltipTrigger>
-          <TooltipContent :collisionPadding="{ left: 20 }" class="bg-foreground text-background max-w-[172px]">
+          <TooltipContent :collisionPadding="{ left: 13, right: 13 }" class="bg-foreground text-background">
             Concepts evaluated on 250k SMILES with F1 ≥ 0.50.
           </TooltipContent>
         </Tooltip>

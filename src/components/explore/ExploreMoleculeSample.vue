@@ -7,6 +7,7 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/component
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 import { MoleculeSampleVisualizer, type FeatureSample } from "./molecule"
+import { ExtrasDistribution } from "./extras"
 
 const { samples } = defineProps<{ samples: Record<string, FeatureSample[]> }>()
 
@@ -38,11 +39,12 @@ const handleHeader = (label: string): string => {
               <Info class="size-5 text-muted-foreground"/>
             </Button>
           </TooltipTrigger>
-          <TooltipContent :collisionPadding="{ left: 20 }" class="bg-foreground text-background max-w-[220px] sm:max-w-none">
+          <TooltipContent :collisionPadding="{ left: 13, right: 13 }" class="w-56 sm:w-auto bg-foreground text-background">
             SMILES grouped into quintiles by normalized maximum SAE activation.
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+      <ExtrasDistribution v-if="samples" :samples />
     </div>
     <div v-if="samples" class="space-y-3">
       <Collapsible v-for="(sample, label, idx) in samples" :key="label" :defaultOpen="idx === 0" class="border-b-2">

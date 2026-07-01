@@ -57,7 +57,11 @@ function handleConceptChange(newValue: ConceptPtr): void {
           <tbody>
             <tr>
               <td>Base:</td>
-              <td><a :href="seleModels.baseModelLink">{{ seleModels.baseModel }}</a></td>
+              <td>
+                <a :href="seleModels.baseModelLink" target="_blank" rel="noopener noreferrer">
+                  {{ seleModels.baseModel }}
+                </a>
+              </td>
             </tr>
             <tr>
               <td>Base layer:</td>

@@ -20,13 +20,13 @@ import { cn } from "@/lib/utils"
 import initRDKit from "@/utils/initRDKit"
 import { activationToColor } from "@/utils/visualizer"
 
-const { model, feature, id, smi, canonicalize = true } = defineProps<{
+const props = withDefaults(defineProps<{
   model: ModelKey;
   feature: number;
   id: string;
   smi: string;
   canonicalize?: boolean;
-}>()
+}>(), { canonicalize: true })
 
 const emit = defineEmits<{
   (e: 'loading', v: boolean): void;
@@ -52,7 +52,7 @@ const {
 
 // utils
 function getActivationsAtFeature() {
-  const featureActivations = activations.value?.[String(feature)]
+  const featureActivations = activations.value?.[String(props.feature)]
   const tmpActivations = new Array(tokens.value?.length).fill(0.0)
   if (featureActivations) {
     const { data, indices } = featureActivations
@@ -80,7 +80,7 @@ onMounted(async () => {
     statusPipeline.value = "tokenizing"
     emit('loading', true)
     const RDKit = await initRDKit()
-    await processor(smi, model, RDKit, canonicalize)
+    await processor(props.smi, props.model, RDKit, props.canonicalize)
 
     if (isSmilesInvalid.value || tokens.value.length === 0) {
       throw new Error("Invalid SMILES string!")
@@ -104,7 +104,7 @@ onMounted(async () => {
   }
 })
 
-watch([() => model, () => feature], async (
+watch([() => props.model, () => props.feature], async (
   [newModel], [oldModel]
 ) => {
   try {
@@ -115,7 +115,7 @@ watch([() => model, () => feature], async (
     const RDKit = await initRDKit()
     if (newModel !== oldModel) {
       data.value = null
-      await processor(smi, newModel, RDKit, canonicalize)
+      await processor(props.smi, newModel, RDKit, props.canonicalize)
 
       if (!activations.value) {
         throw new Error("No activation data.")
