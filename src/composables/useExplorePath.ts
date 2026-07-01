@@ -40,7 +40,7 @@ export default function useExplorePath() {
     },
   })
 
-  const url = computed<string>(() => `https://raw.githubusercontent.com/ckennetha/im-data/restruct/${model.value}/${feature.value}.json`)
+  const url = computed<string>(() => `https://raw.githubusercontent.com/ckennetha/im-data/main/${model.value}/${feature.value}.json`)
   const { data, statusCode, execute, abort } = useFetch(url, { immediate: false }).json<ConceptDataJSON>()
   const conceptJSON = shallowRef<ConceptDataJSON | null>(null)
 

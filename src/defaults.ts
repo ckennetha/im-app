@@ -13,7 +13,7 @@ export const DEFAULT_CONTINUOUS_COLORS = [
 export const DEFAULT_DIVERGING_COLORS = [
   '#c13738',
   '#f19c7a',
-  '#e5e5e5',
+  '#fafafa',
   '#87bfda',
   '#2f79b5',
 ]

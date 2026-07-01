@@ -177,7 +177,7 @@ watch(statusPipeline, (newStage) => emit(newStage))
       </div>
     </CollapsibleTrigger>
     <CollapsibleContent>
-      <div class="space-y-5 px-5 pb-3 text-center">
+      <div class="space-y-5 px-5 py-3 text-center">
         <div class="space-y-2">
           <h2 class="text-xl font-medium">
             {{ canonicalize ? "Canonical SMILES" : "SMILES" }}

@@ -34,8 +34,8 @@ const open = ref<boolean>(false)
               <Info class="size-3 text-muted-foreground"/>
             </Button>
           </TooltipTrigger>
-          <TooltipContent :collisionPadding="{ left: 20 }" class="bg-foreground text-background max-w-71">
-            We evaluated the concepts on a separate test set of 250,000 randomly sampled SMILES and kept those concepts with a minimum F1 score of 0.50.
+          <TooltipContent :collisionPadding="{ left: 20 }" class="bg-foreground text-background max-w-[172px]">
+            Concepts evaluated on 250k SMILES with F1 ≥ 0.50.
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

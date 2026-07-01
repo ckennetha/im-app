@@ -1,0 +1,1 @@
+export { default as ExtrasPosition } from "./ExtrasPosition.vue"

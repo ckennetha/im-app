@@ -38,8 +38,8 @@ const handleHeader = (label: string): string => {
               <Info class="size-5 text-muted-foreground"/>
             </Button>
           </TooltipTrigger>
-          <TooltipContent :collisionPadding="{ left: 20 }" class="bg-foreground text-background max-w-55 sm:max-w-78">
-            We randomly sampled SMILES and grouped them into quintiles by their normalized maximum SAE activation.
+          <TooltipContent :collisionPadding="{ left: 20 }" class="bg-foreground text-background max-w-[220px] sm:max-w-none">
+            SMILES grouped into quintiles by normalized maximum SAE activation.
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
