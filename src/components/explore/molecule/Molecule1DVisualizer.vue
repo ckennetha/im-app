@@ -5,12 +5,18 @@ import { type Token } from "@/utils/tokenize"
 const { tokens, activations, colorHexTokens, isBPE } = defineProps<{
   tokens: Token[]; activations: number[]; colorHexTokens: string[]; isBPE?: boolean;
 }>()
+
+const emit = defineEmits<{ (e: "hover", tk: Token | null): void }>()
 </script>
 
 <template>
 <Tooltip v-for="(tk, idx) in tokens" :key="idx">
   <TooltipTrigger as-child>
-    <span :style="{ backgroundColor: colorHexTokens[idx] }" class="text-base cursor-pointer">
+    <span :style="{ backgroundColor: colorHexTokens[idx] }"
+      class="text-base cursor-pointer hover:border-b-3 hover:border-foreground"
+      @mouseenter="emit('hover', tk)"
+      @mouseleave="emit('hover', null)"
+    >
       {{ tk.token }}
     </span>
   </TooltipTrigger>

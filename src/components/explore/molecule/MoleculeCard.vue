@@ -15,6 +15,7 @@ import { Molecule1DVisualizer } from "."
 
 import { useMoleculePipeline, type PipelineStage } from "@/composables/useMoleculePipeline"
 import type { ModelKey } from "@/config"
+import type { Token } from "@/utils/tokenize"
 
 import { cn } from "@/lib/utils"
 import initRDKit from "@/utils/initRDKit"
@@ -45,6 +46,7 @@ const data = shallowRef<FlatTokenActivation[] | null>(null)
 
 const activationsAtFeature = shallowRef<number[]>([])
 const visProps = shallowRef<VisualizerProps>({ colorHexTokens: [], svg2DString: "" })
+const svgContainer = shallowRef<HTMLElement | null>(null)
 
 const {
   isSmilesInvalid, statusPipeline, validSmiles, tokens, activations, processor,
@@ -73,6 +75,25 @@ function getVisualization(RDKit: RDKitModule) {
   mol!.delete()
 
   visProps.value = { colorHexTokens, svg2DString }
+}
+
+function handleTokenHover(tk: Token | null) {
+  // "path, ellipse" also catches RDKit's unclassed corner-cap paths, so
+  // those go transparent on hover too instead of standing out.
+  const parts = svgContainer.value?.querySelectorAll<SVGElement>("path, ellipse")
+  if (!parts) return
+
+  const targetClass = tk && tk.typeIndex !== null && (tk.type === "Atom" || tk.type === "Bond")
+    ? `${tk.type === "Atom" ? "atom" : "bond"}-${tk.typeIndex}`
+    : null
+
+  parts.forEach(el => {
+    // bond paths carry their endpoint atom classes too (eg. "bond-3 atom-3
+    // atom-4"), so an atom hover also matches - and highlights - every
+    // bond directly connected to that atom.
+    const isTarget = targetClass !== null && el.classList.contains(targetClass)
+    el.style.opacity = targetClass === null ? "" : isTarget ? "1" : "0.15"
+  })
 }
 
 onMounted(async () => {
@@ -161,9 +182,7 @@ watch(statusPipeline, (newStage) => emit(newStage))
         </p>
         <button :aria-label="`Show ${id}`" :disabled="isSmilesInvalid">
           <template v-if="!isSmilesInvalid">
-            <img :src="`data:image/svg+xml;charset=utf-8,${encodeURIComponent(visProps?.svg2DString!)}`"
-              :alt="`${id}`" class="w-full h-full object-contain"
-            >
+            <div ref="svgContainer" class="w-full h-full" v-html="visProps.svg2DString"></div>
           </template>
           <p v-else class="col-start-2 line-clamp-1 min-h-4 text-base font-medium tracking-tight">
             Invalid SMILES string!
@@ -189,6 +208,7 @@ watch(statusPipeline, (newStage) => emit(newStage))
                   :tokens
                   :activations="activationsAtFeature"
                   :colorHexTokens="visProps.colorHexTokens"
+                  @hover="handleTokenHover"
                 />
               </TooltipProvider>
             </div>
@@ -221,6 +241,11 @@ watch(statusPipeline, (newStage) => emit(newStage))
     justify-self: center;
     width: 100%;
     height: 100%;
+
+    path,
+    ellipse {
+      transition: opacity 150ms ease;
+    }
   }
 }
 </style>
