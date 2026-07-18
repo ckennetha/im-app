@@ -2,8 +2,8 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { type Token } from "@/utils/tokenize"
 
-const { tokens, activations, colorHexTokens } = defineProps<{
-  tokens: Token[]; activations: number[]; colorHexTokens: string[];
+const { tokens, activations, colorHexTokens, isBPE } = defineProps<{
+  tokens: Token[]; activations: number[]; colorHexTokens: string[]; isBPE?: boolean;
 }>()
 </script>
 
@@ -18,9 +18,11 @@ const { tokens, activations, colorHexTokens } = defineProps<{
     <ul class="text-center">
       <li>Position: {{ idx }}</li>
       <li>Activation: {{ activations[idx].toFixed(2) }}</li>
-      <li v-if="tk.type !== 'atom' && tk.type !== 'bond'">Type: {{ tk.type }}</li>
-      <li v-if="tk.type === 'atom'">Atom index: {{ tk.typeIndex }}</li>
-      <li v-if="tk.type === 'bond'">Bond index: {{ tk.typeIndex }}</li>
+      <template v-if="!isBPE">
+        <li v-if="tk.type !== 'Atom' && tk.type !== 'Bond'">Type: {{ tk.type }}</li>
+        <li v-if="tk.type === 'Atom'">Atom index: {{ tk.typeIndex }}</li>
+        <li v-if="tk.type === 'Bond'">Bond index: {{ tk.typeIndex }}</li>
+      </template>
     </ul>
   </TooltipContent>
 </Tooltip>

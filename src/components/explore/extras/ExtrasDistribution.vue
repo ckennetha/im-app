@@ -13,8 +13,11 @@ import type { FeatureSample } from '../molecule'
 import type { Token } from '@/utils/tokenize'
 import type { TokenActivation } from "."
 
+import { Models } from '@/config'
+import useModelParam from '@/composables/useModelParam'
 import initRDKit from '@/utils/initRDKit'
 import { getBondInfo, moleculeToTokens } from '@/utils/pipeline'
+import { tokenizeBPE } from '@/utils/tokenizeBPE'
 
 const { samples } = defineProps<{ samples: Record<string, FeatureSample[]> }>()
 
@@ -27,6 +30,9 @@ interface DistStats {
 }
 
 // state
+const model = useModelParam()
+const useBPE = Models[model.value]?.baseModel === "ChemBERTa"
+
 const open = ref<boolean>(false)
 const chartBuilt = ref<boolean>(false)
 const activationData = ref<TokenActivation[]>([])
@@ -44,14 +50,19 @@ const expandActivations = (sparse: [number, number][], length: number): number[]
 async function collectTokenActivations(): Promise<TokenActivation[]> {
   const RDKit = await initRDKit()
   const collected: TokenActivation[] = []
- 
+
   for (const group of Object.values(samples)) {
     for (const { smiles, activations } of group) {
-      const mol = RDKit.get_mol(smiles)
-      const bondInfo = getBondInfo(mol!)
-      const tokens: Token[] = moleculeToTokens(smiles, bondInfo)
-      mol!.delete()
- 
+      let tokens: Token[]
+      if (useBPE) {
+        tokens = await tokenizeBPE(smiles)
+      } else {
+        const mol = RDKit.get_mol(smiles)
+        const bondInfo = getBondInfo(mol!)
+        tokens = moleculeToTokens(smiles, bondInfo)
+        mol!.delete()
+      }
+
       const dense = expandActivations(activations, tokens.length)
       dense.forEach((val, idx) => {
         if (val !== 0) {

@@ -2,7 +2,7 @@ import type { ModelKey } from "./models"
 import type { CoreTokenType } from "@/utils/tokenize"
 
 // config
-export const Concepts: Record<ModelKey, Record<CoreTokenType, Record<string, number[]>>> = {
+export const Concepts: Partial<Record<ModelKey, Record<CoreTokenType, Record<string, number[]>>>> = {
   "MOL-1-3072-128": {
     "Atom": {
       "[C@H]": [

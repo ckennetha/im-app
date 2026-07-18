@@ -9,6 +9,7 @@ const { model, feature, conceptJSON } = useExplorePath()
 <template>
   <MainSidebar>
     <ExploreConcept v-if="conceptJSON"
+      :model="model"
       :feature="feature"
       :concepts="conceptJSON.concepts"
       :position-info="conceptJSON.extras?.positionInfo"

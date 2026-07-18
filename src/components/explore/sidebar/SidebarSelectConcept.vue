@@ -43,17 +43,20 @@ const open = ref<boolean>(false)
     <SelectTrigger id="concept" class="w-full !bg-background">
       <SelectValue class="text-sm"/>
     </SelectTrigger>
-    <SelectContent side="bottom" class="max-h-[var(--dynamic-h)] focus-visible:!ring-0"
-      style="--dynamic-h: clamp(112px, calc(112px + (100dvh - 670px)), 304px)"
+    <SelectContent side="bottom" class="max-h-[var(--dynamic-h)] w-[var(--reka-select-trigger-width)] focus-visible:!ring-0"
+      style="--dynamic-h: clamp(112px, calc(112px + (100dvh - 670px)), 224px)"
     >
       <SelectGroup v-for="(conceptPtrs, tokenType) in concepts" :key="tokenType"
-        class="my-1 first:mt-0 last:mb-0 border rounded-md"
+        class="my-1 first:mt-0 last:mb-0 rounded-md"
       >
         <Badge class="ms-1 my-1 text-xs text-muted" :style="{ backgroundColor: groupColors[tokenType] }">
           {{ tokenType }}
         </Badge>
         <SelectItem v-for="(featureIdxs, concept) in conceptPtrs" :key="concept" :value="{ tokenType, concept }">
-					"{{ concept }}" ({{ featureIdxs.length }})
+					<span class="grid grid-cols-[minmax(0,1fr)_auto] w-full items-center gap-1">
+						<span class="truncate">"{{ concept }}"</span>
+						<span>({{ featureIdxs.length }})</span>
+					</span>
 				</SelectItem>
       </SelectGroup>
     </SelectContent>

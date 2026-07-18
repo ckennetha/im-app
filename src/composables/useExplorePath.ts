@@ -11,9 +11,9 @@ import { normalizeRouteExplore, normalizeRouteSearch } from "@/router/utils"
 
 // type
 export interface PositionInfo {
-  corr: number;
-  averageTokenLength: number;
-  numSamples: number;
+  corr: number | null;
+  averageTokenLength: number | null;
+  numSamples: number | null;
 }
 
 interface ConceptDataJSON {

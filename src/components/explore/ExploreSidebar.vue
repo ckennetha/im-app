@@ -23,11 +23,13 @@ interface ConceptPtr {
 // states
 const { model, feature, isInExplore } = useExplorePath()
 
-const models: ModelKey[] = Object.keys(Models)
+const models = computed<ModelKey[]>(() =>
+  Object.keys(Models).filter(k => isInExplore.value || Models[k].doInference)
+)
 const seleModels = computed<Model>(() => Models[model.value])
 
 const conceptPtr = shallowRef<ConceptPtr>()
-const seleConcepts = computed<Record<CoreTokenType, Record<string, number[]>>>(() => Concepts[model.value])
+const seleConcepts = computed<Record<CoreTokenType, Record<string, number[]>> | undefined>(() => Concepts[model.value])
 
 // utils
 function handleRandomFeature(min: number, max: number) {
@@ -37,7 +39,7 @@ const debouncedHandleRandomFeature = useDebounceFn(handleRandomFeature, 200)
 
 function handleConceptChange(newValue: ConceptPtr): void {
   const { tokenType, concept } = newValue
-  const featureIdxs = seleConcepts.value[tokenType][concept]
+  const featureIdxs = seleConcepts.value![tokenType][concept]
   feature.value = featureIdxs[Math.floor(Math.random() * featureIdxs.length)]
 }
 </script>
@@ -95,7 +97,7 @@ function handleConceptChange(newValue: ConceptPtr): void {
           Random Feature
         </Button>
       </SidebarGroup>
-      <SidebarGroup class="gap-y-2">
+      <SidebarGroup v-if="seleConcepts" class="gap-y-2">
         <SidebarSelectConcept v-model="conceptPtr" @update:modelValue="handleConceptChange" :concepts="seleConcepts" />
       </SidebarGroup>
     </SidebarContent>

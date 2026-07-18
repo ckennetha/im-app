@@ -10,9 +10,12 @@ import { Molecule1DVisualizer, Molecule2DVisualizer } from "."
 import type { Token } from "@/utils/tokenize"
 import type { FeatureSample } from "."
 
+import { Models } from "@/config"
+import useModelParam from "@/composables/useModelParam"
 import { cn } from "@/lib/utils"
 import initRDKit from "@/utils/initRDKit"
 import { getBondInfo, moleculeToTokens } from "@/utils/pipeline"
+import { tokenizeBPE } from "@/utils/tokenizeBPE"
 import { activationToColor } from "@/utils/visualizer"
 
 const { sample } = defineProps<{ sample: FeatureSample[] }>()
@@ -42,15 +45,23 @@ function expandActivations(sparse: [number, number][], length: number): number[]
 }
 
 // workflow
+const model = useModelParam()
+const useBPE = Models[model.value]?.baseModel === "ChemBERTa"
+
 const RDKit = await initRDKit()
 const tokenVisProps: TokenVisProps[] = []
 
 for (const { smiles, activations } of sample) {
-  const mol = RDKit.get_mol(smiles)
-  const bondInfo = getBondInfo(mol!)
-  mol!.delete()
-  
-  const tokens = moleculeToTokens(smiles, bondInfo)
+  let tokens: Token[]
+  if (useBPE) {
+    tokens = await tokenizeBPE(smiles)
+  } else {
+    const mol = RDKit.get_mol(smiles)
+    const bondInfo = getBondInfo(mol!)
+    mol!.delete()
+    tokens = moleculeToTokens(smiles, bondInfo)
+  }
+
   const denseActivations = expandActivations(activations, tokens.length)
   const { colorHexTokens, svgOptionsString } = activationToColor(tokens, denseActivations, true)
 
@@ -121,7 +132,7 @@ const toggleStructureVisibility = (idx: number): void | Promise<void> => {
             >
               <Copy class="!size-4 text-border group-hover:text-muted-foreground group-active:text-background" />
             </Button>
-            <Button size="icon" class="!px-0 size-5 !border-0 !shadow-none hover:!bg-background group"
+            <Button v-if="!useBPE" size="icon" class="!px-0 size-5 !border-0 !shadow-none hover:!bg-background group"
               @click="toggleStructureVisibility(idx)"
             >
               <component :is="isShown(idx) ? EyeOff : Eye"
@@ -137,6 +148,7 @@ const toggleStructureVisibility = (idx: number): void | Promise<void> => {
               :tokens="tokenVisProp.tokens"
               :activations="tokenVisProp.activationsPerFeature"
               :colorHexTokens="tokenVisProp.colorHexTokens"
+              :isBPE="useBPE"
             />
           </div>
         </div>

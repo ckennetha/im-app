@@ -12,7 +12,9 @@ const { models } = defineProps<{ models: ModelKey[] }>()
     <SelectTrigger id="model" class="w-full !bg-background">
       <SelectValue class="text-sm"/>
     </SelectTrigger>
-    <SelectContent class="focus-visible:!ring-0">
+    <SelectContent class="max-h-[var(--dynamic-h)] w-[var(--reka-select-trigger-width)] focus-visible:!ring-0"
+      style="--dynamic-h: clamp(112px, calc(112px + (100dvh - 670px)), 156px)"
+    >
       <SelectItem v-for="model in models" :key="model" :value="model">
         {{ model }}
       </SelectItem>

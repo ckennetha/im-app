@@ -12,8 +12,10 @@ const { positionInfo } = defineProps<{ positionInfo: PositionInfo }>()
 
 const trackGradient = `linear-gradient(to right, ${DEFAULT_DIVERGING_COLORS.join(', ')})`
 
-const mainColor = mapColorDivergent(positionInfo.corr, DEFAULT_DIVERGING_CMAP).toHexString()
-const textColor = Math.abs(positionInfo.corr) >= 0.25 ? '#fafafa' : '#212427'
+const corr = positionInfo.corr ?? 0
+
+const mainColor = mapColorDivergent(corr, DEFAULT_DIVERGING_CMAP).toHexString()
+const textColor = Math.abs(corr) >= 0.25 ? '#fafafa' : '#212427'
 </script>
 
 <template>
@@ -31,11 +33,11 @@ const textColor = Math.abs(positionInfo.corr) >= 0.25 ? '#fafafa' : '#212427'
         <div class="flex justify-between">
           <span>Spearman correlation (ρ)</span>
           <span class="font-medium text-foreground">
-            {{ positionInfo.corr.toFixed(2) }}
+            {{ corr.toFixed(2) }}
           </span>
         </div>
         <Slider
-          :model-value="[positionInfo.corr]"
+          :model-value="[corr]"
           :min="-1"
           :max="1"
           :step="0.01"
@@ -62,13 +64,13 @@ const textColor = Math.abs(positionInfo.corr) >= 0.25 ? '#fafafa' : '#212427'
         <div>
           <div>Sample size</div>
           <div class="pt-1 font-medium text-foreground">
-            {{ positionInfo.numSamples.toLocaleString() }}/250,000
+            {{ positionInfo.numSamples?.toLocaleString() ?? "N/A" }}/250,000
           </div>
         </div>
         <div>
           <div>Avg. token length</div>
           <div class="pt-1 font-medium text-foreground">
-            {{ positionInfo.averageTokenLength.toFixed(1) }}
+            {{ positionInfo.averageTokenLength?.toFixed(1) ?? "N/A" }}
           </div>
         </div>
       </div>
